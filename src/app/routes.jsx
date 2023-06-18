@@ -5,6 +5,9 @@ import { authRoles } from './auth/authRoles';
 import Loadable from './components/Loadable';
 import MatxLayout from './components/MatxLayout/MatxLayout';
 import materialRoutes from 'app/views/material-kit/MaterialRoutes';
+import Users from './views/configuration/user/Table';
+import Logs from './views/configuration/logs/Table';
+import Form from './views/configuration/user/From';
 
 // session pages
 const NotFound = Loadable(lazy(() => import('app/views/sessions/NotFound')));
@@ -28,18 +31,14 @@ const routes = [
     children: [
       ...materialRoutes,
       // dashboard route
-      {
-        path: '/dashboard/default',
-        element: <Analytics />,
-        auth: authRoles.admin
-      },
+      {path: '/dashboard/default',element: <Analytics />,auth: authRoles.admin},
 
-      // e-chart rooute
-      {
-        path: '/charts/echarts',
-        element: <AppEchart />,
-        auth: authRoles.editor
-      }
+      // configuration rooute
+      {path: '/configuration',element: <Users />, auth: authRoles.editor},
+      {path: '/configuration/users',element: <Users />, auth: authRoles.editor},
+      {path: '/configuration/users/create',element: <Form />},
+      {path: '/configuration/users/update/:id',element: <Form />},
+      {path: '/configuration/logs',element: <Logs />, auth: authRoles.editor}
     ]
   },
 

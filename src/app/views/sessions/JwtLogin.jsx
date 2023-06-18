@@ -3,10 +3,16 @@ import { Card, Checkbox, Grid, TextField } from '@mui/material';
 import { Box, styled, useTheme } from '@mui/material';
 import { Paragraph } from 'app/components/Typography';
 import useAuth from 'app/hooks/useAuth';
+// import { userLogin } from '../../store/user/actions';
 import { Formik } from 'formik';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
+import axios from "../../store/helpers/axios";
+import { toast } from 'react-toastify';
+import { connect } from 'react-redux';
+import { mapStateToProps } from 'app/store/helpers/mapState';
+import { mapDispatchToProps } from 'app/store/helpers/mapDispatch';
 
 const FlexBox = styled(Box)(() => ({ display: 'flex', alignItems: 'center' }));
 
@@ -34,9 +40,8 @@ const JWTRoot = styled(JustifyBox)(() => ({
 
 // inital login credentials
 const initialValues = {
-  email: 'jason@ui-lib.com',
+  username: 'jason@ui-lib.com',
   password: 'dummyPass',
-  remember: true
 };
 
 // form field validation schema
@@ -44,7 +49,7 @@ const validationSchema = Yup.object().shape({
   password: Yup.string()
     .min(6, 'Password must be 6 character length')
     .required('Password is required!'),
-  email: Yup.string().email('Invalid Email address').required('Email is required!')
+  username: Yup.string().email('Invalid Email address').required('Email is required!')
 });
 
 const JwtLogin = () => {
@@ -54,13 +59,34 @@ const JwtLogin = () => {
 
   const { login } = useAuth();
 
+  // const handleFormSubmit = async (values) => {
+  //   setLoading(true);
+  //   try {
+  //     // await login(values.email, values.password);
+  //     // await userLogin({ username: values.email, password: values.password });
+  //     navigate('/');
+  //   } catch (e) {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleFormSubmit = async (values) => {
-    setLoading(true);
     try {
-      await login(values.email, values.password);
-      navigate('/');
-    } catch (e) {
-      setLoading(false);
+      let url = "/auth/signin";
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      const method = "post";
+      const { data } = await axios({ method, headers, url, data: values });
+      const accessToken = data?.accessToken;
+      if (data) {
+        console.log("data ----------------------- ", data);
+        localStorage.setItem("accessToken", accessToken);
+        window.location.replace("/dashboard/default");
+      }
+      window.location.replace("/dashboard/default");
+    } catch (error) {
+      toast.error(error?.response?.data?.message);
     }
   };
 
@@ -79,15 +105,14 @@ const JwtLogin = () => {
               <Formik
                 onSubmit={handleFormSubmit}
                 initialValues={initialValues}
-                validationSchema={validationSchema}
-              >
+                validationSchema={validationSchema}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
                   <form onSubmit={handleSubmit}>
                     <TextField
                       fullWidth
                       size="small"
                       type="email"
-                      name="email"
+                      name="username"
                       label="Email"
                       variant="outlined"
                       onBlur={handleBlur}
@@ -114,7 +139,7 @@ const JwtLogin = () => {
                     />
 
                     <FlexBox justifyContent="space-between">
-                      <FlexBox gap={1}>
+                      {/* <FlexBox gap={1}>
                         <Checkbox
                           size="small"
                           name="remember"
@@ -124,7 +149,7 @@ const JwtLogin = () => {
                         />
 
                         <Paragraph>Remember Me</Paragraph>
-                      </FlexBox>
+                      </FlexBox> */}
 
                       <NavLink
                         to="/session/forgot-password"
@@ -163,5 +188,4 @@ const JwtLogin = () => {
     </JWTRoot>
   );
 };
-
 export default JwtLogin;

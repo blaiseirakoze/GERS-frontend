@@ -22,10 +22,10 @@ const reducer = (state, action) => {
 
 const NotificationContext = createContext({
   notifications: [],
-  deleteNotification: () => {},
-  clearNotifications: () => {},
-  getNotifications: () => {},
-  createNotification: () => {}
+  deleteNotification: () => { },
+  clearNotifications: () => { },
+  getNotifications: () => { },
+  createNotification: () => { }
 });
 
 export const NotificationProvider = ({ children }) => {
@@ -79,8 +79,7 @@ export const NotificationProvider = ({ children }) => {
         clearNotifications,
         createNotification,
         notifications: state.notifications
-      }}
-    >
+      }}>
       {children}
     </NotificationContext.Provider>
   );

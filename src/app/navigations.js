@@ -19,8 +19,8 @@ export const navigations = [
     name: 'Configuration',
     icon: 'settings',
     children: [
-      { name: 'Users', path: '/material/table', iconText: 'T' },
-      { name: 'Logs', path: '/material/table', iconText: 'T' },
+      { name: 'Users', path: '/configuration/users', iconText: 'T' },
+      { name: 'Logs', path: '/configuration/logs', iconText: 'T' },
     ]
   },
 ];
