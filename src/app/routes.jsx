@@ -8,6 +8,9 @@ import materialRoutes from 'app/views/material-kit/MaterialRoutes';
 import Users from './views/configuration/user/Table';
 import Logs from './views/configuration/logs/Table';
 import Form from './views/configuration/user/From';
+import Requests from "./views/request/Table";
+import CreateRequest from "./views/request/From";
+import RequestDetails from "./views/request/Details";
 
 // session pages
 const NotFound = Loadable(lazy(() => import('app/views/sessions/NotFound')));
@@ -16,7 +19,7 @@ const JwtRegister = Loadable(lazy(() => import('app/views/sessions/JwtRegister')
 const ForgotPassword = Loadable(lazy(() => import('app/views/sessions/ForgotPassword')));
 
 // echart page
-const AppEchart = Loadable(lazy(() => import('app/views/charts/echarts/AppEchart')));
+// const AppEchart = Loadable(lazy(() => import('app/views/charts/echarts/AppEchart')));
 
 // dashboard page
 const Analytics = Loadable(lazy(() => import('app/views/dashboard/Analytics')));
@@ -33,12 +36,19 @@ const routes = [
       // dashboard route
       {path: '/dashboard/default',element: <Analytics />,auth: authRoles.admin},
 
-      // configuration rooute
+      // configuration route
       {path: '/configuration',element: <Users />, auth: authRoles.editor},
       {path: '/configuration/users',element: <Users />, auth: authRoles.editor},
       {path: '/configuration/users/create',element: <Form />},
       {path: '/configuration/users/update/:id',element: <Form />},
-      {path: '/configuration/logs',element: <Logs />, auth: authRoles.editor}
+      {path: '/configuration/logs',element: <Logs />, auth: authRoles.editor},
+      {path: '/configuration/roles',element: <Users />},
+
+      // request route
+      {path: '/requests',element: <Requests />, auth: authRoles.editor},
+      {path: '/requests/create',element: <CreateRequest />},
+      {path: '/requests/update/:id',element: <CreateRequest />},
+      {path: '/requests/details/:id',element: <RequestDetails />},
     ]
   },
 

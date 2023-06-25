@@ -21,10 +21,11 @@ import { Span } from "app/components/Typography";
 import { useEffect, useState } from "react";
 import { TextValidator, ValidatorForm, SelectValidator } from "react-material-ui-form-validator";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
-import axios from "../../../store/helpers/axios";
+import axios from "../../store/helpers/axios";
 import { amber, green } from '@mui/material/colors';
 import { default as ReactSelect } from "react-select";
+import JoditEditor from 'jodit-react';
+import { useRef } from 'react';
 
 const Container = styled('div')(({ theme }) => ({
     margin: '30px',
@@ -47,7 +48,11 @@ const Form = () => {
         error: false,
         message: ""
     });
+    const [content, setContent] = useState('');
     const [isUpdate, setIsUpdate] = useState(false);
+    const [users, setUsers] = useState([]);
+
+    const editor = useRef(null);
     const location = useLocation();
     const user = location?.state;
 
@@ -59,27 +64,32 @@ const Form = () => {
     }
 
     const [state, setState] = useState({
-        username: "",
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        role: { value: "", label: "" },
-        gender: ""
+        documents: [],
+        approver: { value: "", label: "" },
     });
+    const [doc, setDoc] = useState();
+    const {
+        documents, approver
+    } = state;
     const navigate = useNavigate();
 
     // update user
     const handleSubmit = async (event) => {
         try {
-            const url = `/user/create`;
+            const url = `/request/create`;
             const headers = {
-                "Content-Type": "application/json",
+                "Content-Type": "multipart/form-data",
+                "Accept": "application/json, multipart/form-data, */*"
             };
             const method = "post";
-            const { data } = await axios({ method, headers, url, data: { ...state, roleId: state.role.value } });
-            // toast.success(data?.message);
-            navigate("/configuration/users");
+            const info = new FormData();
+            info.append("documents", doc);
+            info.append("approver", approver.value);
+            info.append("reason", content);
+            const { data } = await axios({ method, headers, url, data: info });
+            if (data) {
+                navigate("/requests");
+            }
         } catch (error) {
             setAlert({ ...alert, error: true, message: error?.response?.data?.message.toString() })
         }
@@ -93,7 +103,7 @@ const Form = () => {
                 "Content-Type": "application/json",
             };
             const method = "put";
-            const { data } = await axios({ method, headers, url, data: { ...state, roleId: state.role.value } });
+            const { data } = await axios({ method, headers, url, data: { ...state, roleId: state.role.value, documents: documents } });
             // toast.success(data?.message);
             navigate("/configuration/users");
         } catch (error) {
@@ -115,6 +125,20 @@ const Form = () => {
         }
     }
 
+    // get Users
+    const getUsers = async (roleId) => {
+        try {
+            const url = `/user/search?roleId=${roleId}`;
+            const headers = {
+                "Content-Type": "application/json",
+            };
+            const method = "get";
+            const { data } = await axios({ method, headers, url });
+            setUsers(data?.data);
+        } catch (error) {
+        }
+    }
+
     useEffect(() => {
         getRoles();
         if (location?.pathname === `/configuration/users/update/${user?.id}`) {
@@ -130,28 +154,26 @@ const Form = () => {
         }
     }, []);
 
+    useEffect(() => {
+        const roleId = roles?.find((role) => role.name === "approver")?.id;
+        getUsers(roleId);
+    }, [roles]);
+
     const handleChange = (event) => {
-        // event.persist();
+        event.persist();
+        if (event.target.type === "file") {
+            setDoc(event.target.files[0]);
+        }
         setState({ ...state, [event.target.name]: event.target.value });
     };
-
-    const {
-        username,
-        firstName,
-        lastName,
-        email,
-        phone,
-        roleId,
-        gender
-    } = state;
 
     return (
         <Container>
             <Box className="breadcrumb">
-                <Breadcrumb routeSegments={[{ name: "Configuration", path: "/configuration/users" }, { name: "User", path: "/configuration/users" }, { name: "form" }]} />
+                <Breadcrumb routeSegments={[{ name: "Create", path: "/requests" }, { name: "form" }]} />
             </Box>
             <Stack spacing={3}>
-                <SimpleCard title={isUpdate ? "Update User" : `Create User`}>
+                <SimpleCard title={isUpdate ? "Update Request" : `Create Request`} padding={'20px 24px 80px 24px'}>
                     {alert?.error ?
                         <Alert onClose={handleClose} sx={{ m: 1 }} severity="error" variant="filled">
                             {alert?.message}
@@ -160,79 +182,58 @@ const Form = () => {
                     <div>
                         <ValidatorForm onSubmit={isUpdate ? handleUpdate : handleSubmit} onError={() => null}>
                             <Grid container spacing={6}>
-                                <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mt: 2 }}>
+                                <Grid item lg={12} md={12} sm={12} xs={12} sx={{ mt: 2 }}>
+                                    <div>
+                                        <label htmlFor="">Request Letter <span className='text-danger'>*</span></label>
+                                        <JoditEditor
+                                            required
+                                            className='mb-4'
+                                            ref={editor}
+                                            value={content}
+                                            // config={config}
+                                            // tabIndex={1} // tabIndex of textarea
+                                            onBlur={newContent => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
+                                            onChange={newContent => { }}
+                                        />
+                                    </div>
 
-                                    <TextField
-                                        type="email"
-                                        name="email"
-                                        label="Email"
-                                        value={email || ""}
-                                        onChange={handleChange}
-                                        validators={["required", "isEmail"]}
-                                        errorMessages={["this field is required", "email is not valid"]}
-                                    />
-                                    <TextField
-                                        type="text"
-                                        name="firstName"
-                                        label="First Name"
-                                        onChange={handleChange}
-                                        value={firstName || ""}
-                                        validators={["required"]}
-                                        errorMessages={["this field is required"]}
-                                    />
-                                    <TextField
-                                        type="text"
-                                        name="lastName"
-                                        label="Last Name"
-                                        onChange={handleChange}
-                                        value={lastName || ""}
-                                        validators={["required"]}
-                                        errorMessages={["this field is required"]}
-                                    />
+                                    <div>
+                                        <label htmlFor="">Supporting document(s)</label>
+                                        <TextField
+                                            type="file"
+                                            name="documents"
+                                            // label="supporting Documents"
+                                            onChange={handleChange}
+                                            value={documents || ""}
+                                        // validators={["required"]}
+                                        // errorMessages={["this field is required"]}
+                                        />
+                                    </div>
 
-                                </Grid>
-
-                                <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mt: 2 }}>
-                                    <ReactSelect
-                                        value={state?.role}
-                                        name="roleId"
-                                        styles={{
-                                            control: (baseStyles, state) => ({
-                                                ...baseStyles,
-                                                padding: 7,
-                                                marginBottom: 18
-                                            }),
-                                        }}
-                                        required
-                                        options={
-                                            roles?.map((role) => ({ value: role.id, label: role.label }))
-                                        }
-                                        onChange={(v) => setState({ ...state, role: v })} />
-                                    <TextField
-                                        type="text"
-                                        name="username"
-                                        id="standard-basic"
-                                        value={username || ""}
-                                        onChange={handleChange}
-                                        errorMessages={["this field is required"]}
-                                        label="Username"
-                                        validators={["required"]}
-                                    />
-                                    <TextField
-                                        type="text"
-                                        name="phone"
-                                        label="Phone"
-                                        onChange={handleChange}
-                                        value={phone || ""}
-                                        errorMessages={["this field is required"]}
-                                        validators={["required", "minStringLength:10", "maxStringLength: 10"]}
-                                    />
-
+                                    <div>
+                                        <label htmlFor="">Select approver <span className='text-danger'>*</span> </label>
+                                        <ReactSelect
+                                            className='z-3 bg-white'
+                                            value={approver}
+                                            name="roleId"
+                                            styles={{
+                                                control: (baseStyles, state) => ({
+                                                    ...baseStyles,
+                                                    padding: 7,
+                                                    marginBottom: 18
+                                                }),
+                                            }}
+                                            required
+                                            options={
+                                                users?.map((user) => ({ value: user.id, label: `${user.firstName} ${user.lastName} (${user.role.label})` }))
+                                            }
+                                            onChange={(v) => setState({ ...state, approver: v })} />
+                                    </div>
                                 </Grid>
                             </Grid>
                             <div className='text-end'>
                                 <Button
-                                    onClick={() => navigate("/configuration/users")}
+                                    onClick={() => navigate("/requests")}
                                     color="primary"
                                     variant="outlined"
                                     type="button">

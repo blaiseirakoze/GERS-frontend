@@ -153,7 +153,7 @@ const Users = () => {
                     <TableCell align="left">{user.firstName} {user.lastName}</TableCell>
                     <TableCell align="center">{user.email}</TableCell>
                     <TableCell align="center">{user.phone}</TableCell>
-                    <TableCell align="center">{user?.role?.name}</TableCell>
+                    <TableCell align="center">{user?.role?.label}</TableCell>
                     <TableCell align="center">{moment(user.createdAt).format("DD-MM-yyyy")}</TableCell>
                     <TableCell align="center"> <Small bgcolor={user.status === "active" ? bgSuccess : bgError}>{user.status}</Small> </TableCell>
                     <TableCell align="right">
