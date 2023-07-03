@@ -23,6 +23,7 @@ import ConfirmationDialog from "app/components/dialog/ConfirmationDialog";
 import JoditEditor from 'jodit-react';
 import { useRef } from 'react';
 import { Fab } from '@mui/material';
+import ChangeStatus from "./ChangeStatus";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -78,6 +79,22 @@ const Details = () => {
 
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [changeStatusInfo, setChangeStatusInfo] = useState({
+    status: "",
+    comment: "",
+    id: request?.id
+  });
+  const [alert, setAlert] = useState({
+    error: false,
+    message: ""
+  });
+
+  const handleOpenChangeStatus = (title, status) => {
+    setChangeStatusInfo({ ...changeStatusInfo, title, status })
+    setOpen(true)
+  };
+  const handleCloseChangeStatus = () => setOpen(false);
 
   // get requests
   const getRequests = async () => {
@@ -92,19 +109,19 @@ const Details = () => {
     } catch (error) {
     }
   }
-
-  // handle delete
-  const handleDelete = async () => {
+  // handle submit
+  const handleSubmit = async () => {
     try {
-      const url = `/user/delete/${id}`;
+      const url = `/request/change-status/${changeStatusInfo.id}`;
       const headers = {
         "Content-Type": "application/json",
       };
-      const method = "delete";
-      await axios({ method, headers, url });
-      getRequests();
-      setOpenDelete(false);
+      const method = "put";
+      await axios({ method, headers, url, data: changeStatusInfo });
+      navigate("/requests");
+      setOpen(false);
     } catch (error) {
+      setAlert({ ...alert, error: true, message: error?.response?.data?.message?.toString() })
     }
   }
 
@@ -120,58 +137,53 @@ const Details = () => {
 
   return (
     <Container>
-      <ConfirmationDialog
-        title={"Delete User"}
-        message={"Are you sure you want to delete this user?"}
-        action={handleDelete}
-        handleClose={handleCloseDelete}
-        open={openDelete} />
+      <ChangeStatus
+        open={open}
+        handleClose={handleCloseChangeStatus}
+        info={changeStatusInfo}
+        setInfo={setChangeStatusInfo}
+        handleSubmit={handleSubmit}
+        alert={alert} />
       <Box className="breadcrumb d-flex justify-content-between">
         <Breadcrumb routeSegments={[{ name: "Request", path: "/requests" }, { name: "Requests" }]} />
       </Box>
       <Stack spacing={3}>
         <SimpleCard title="">
-          <div className="d-flex justify-content-between w-100">
-            <div width="100%" overflow="auto">
-              <Small bgcolor={request.status === "pending" ? bgWarning : bgError}>{request.status}</Small>
+          <div className="d-flex justify-content-between ">
+            <div overflow="auto">
+              <span className="text-capitalize">{request?.title}: </span> <Small bgcolor={request?.status === "pending" ? bgWarning :
+                request?.status === "missing information" ? bgInfo :
+                  request?.status === "approved" ? bgSuccess : bgError}>{request.status}</Small>
             </div>
-            <div className="d-flex w-50 justify-content-between">
-              <button className="bg-white text-warning border-1 border-warning rounded py-1 px-4 text-capitalize m-l">
-                missing information
-              </button>
-              <button className="bg-white text-info border-1 border-info rounded py-1 px-4 text-capitalize m-l">
-                review & forward
-              </button>
-              <button className="bg-white text-success border-1 border-success rounded py-1 px-4 text-capitalize m-l">
-                approve
-              </button>
-              <button className="bg-white text-danger border-1 border-danger rounded py-1 px-4 text-capitalize">
-                reject
-              </button>
-            </div>
+            {
+              request?.status === "pending" ?
+                <div>
+                  <StyledButton onClick={() => handleOpenChangeStatus("missing information", "missing information")} variant="outlined" color="info">
+                    Missing info
+                  </StyledButton>
+                  <StyledButton onClick={() => handleOpenChangeStatus("approve", "approved")} variant="outlined" color="success">
+                    Approve
+                  </StyledButton>
+                  <StyledButton onClick={() => handleOpenChangeStatus("reject", "rejected")} variant="outlined" color="warning">
+                    Reject
+                  </StyledButton>
+                </div> : null}
           </div>
         </SimpleCard>
+
         <SimpleCard title="Requester">
           <div className="d-flex justify-content-between w-50">
             <Stack spacing={2} width="100%" overflow="auto">
               <div className="fw-bold text-capitalize ">names:</div>
+              <div className="fw-bold text-capitalize ">email: </div>
+              <div className="fw-bold text-capitalize ">phone: </div>
               <div className="fw-bold text-capitalize ">role: </div>
             </Stack>
             <Stack spacing={2} width="100%" overflow="auto">
               <div className=" text-capitalize "> {request?.requestedBy?.firstName} {request?.requestedBy?.lastName} </div>
               <div className=" text-capitalize "> {request?.requestedBy?.role?.label}  </div>
-            </Stack>
-          </div>
-        </SimpleCard>
-        <SimpleCard title="Approver">
-          <div className="d-flex justify-content-between w-50">
-            <Stack spacing={2} width="100%" overflow="auto">
-              <div className="fw-bold text-capitalize ">names:</div>
-              <div className="fw-bold text-capitalize ">role: </div>
-            </Stack>
-            <Stack spacing={2} width="100%" overflow="auto">
-              <div className=" text-capitalize "> {request?.approvedBy?.firstName} {request?.approvedBy?.lastName} </div>
-              <div className=" text-capitalize "> {request?.approvedBy?.role?.label}  </div>
+              <div className=" text-capitalize "> {request?.requestedBy?.email}  </div>
+              <div className=" text-capitalize "> {request?.requestedBy?.phone}  </div>
             </Stack>
           </div>
         </SimpleCard>
@@ -189,13 +201,17 @@ const Details = () => {
           <div className="bg-secondary py-2 px-4 rounded text-white fw-bold d-flex" style={{ width: "20%" }}>
             <span>{request?.documents}</span> <IconButton className="text-white"> <Icon>visibility</Icon> </IconButton>
           </div>
+
+          {/* <object data={`${"file:///home/irakoze/Documents/projects/my-projects/approval-system/files/project-files"}/${request?.documents}#view=Fit&toolbar=0&statusbar=0&messages=0&navpanes=0&scrollbar=0`} type="application/pdf" style={{ display: "inline-block" }} width={"60%"} height={"600"}>
+            <embed src={`${"file:///home/irakoze/Documents/projects/my-projects/approval-system/files/project-files"}/${request?.documents}`} type="application/pdf" />
+          </object> */}
         </SimpleCard>
         <SimpleCard title="Request Process">
           {
             request?.requestProcess?.map((process, index) => {
               return (
                 <div key={index} className="">
-                  <div className="p-0"> <IconButton color="warning"><Icon>fiber_manual_record</Icon></ IconButton> <span> {request?.status}</span> - {process?.createdBy?.firstName} {process?.createdBy?.lastName} - {moment(process?.createdAt).format("DD-MM-yyyy HH:mm")}</div>
+                  <div className="p-0"> <IconButton color="warning"><Icon>fiber_manual_record</Icon></ IconButton> <span> {process?.status}</span> - {process?.createdBy?.firstName} {process?.createdBy?.lastName} - {moment(process?.createdAt).format("DD-MM-yyyy HH:mm")}</div>
                 </div>
               )
             })

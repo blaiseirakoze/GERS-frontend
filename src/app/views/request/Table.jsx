@@ -95,7 +95,7 @@ const Requests = () => {
   // handle delete
   const handleDelete = async () => {
     try {
-      const url = `/user/delete/${id}`;
+      const url = `/request/delete/${id}`;
       const headers = {
         "Content-Type": "application/json",
       };
@@ -120,8 +120,8 @@ const Requests = () => {
   return (
     <Container>
       <ConfirmationDialog
-        title={"Delete User"}
-        message={"Are you sure you want to delete this user?"}
+        title={"Delete Request"}
+        message={"Are you sure you want to delete this request?"}
         action={handleDelete}
         handleClose={handleCloseDelete}
         open={openDelete} />
@@ -134,13 +134,13 @@ const Requests = () => {
         </StyledButton>
       </Box>
 
-      <SimpleCard title="Users">
+      <SimpleCard title="Requests">
         <Box width="100%" overflow="auto">
           <StyledTable>
             <TableHead>
               <TableRow>
-                <TableCell align="left">Requested by</TableCell>
-                <TableCell align="center">Approver</TableCell>
+                <TableCell align="left">Title</TableCell>
+                <TableCell align="center">Requested by</TableCell>
                 <TableCell align="center">Created At</TableCell>
                 <TableCell align="center">Status</TableCell>
                 <TableCell align="right">Action</TableCell>
@@ -151,22 +151,36 @@ const Requests = () => {
                 slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).
                 map((request, index) => (
                   <TableRow key={index}>
-                    <TableCell align="left">{request.requestedBy.firstName} {request.requestedBy.lastName}</TableCell>
-                    <TableCell align="center">{request.approvedBy.firstName} {request.approvedBy.lastName}</TableCell>
-                    <TableCell align="center">{moment(request.createdAt).format("DD-MM-yyyy")}</TableCell>
-                    <TableCell align="center"> <Small bgcolor={request.status === "pending" ? bgWarning : bgError}>{request.status}</Small> </TableCell>
+                    <TableCell align="left">{request?.title}</TableCell>
+                    <TableCell align="center">{request?.requestedBy?.firstName} {request?.requestedBy?.lastName}</TableCell>
+                    <TableCell align="center">{moment(request?.createdAt).format("DD-MM-yyyy")}</TableCell>
+                    <TableCell align="center"> <Small bgcolor={request?.status === "pending" ? bgWarning :
+                      request?.status === "missing information" ? bgInfo :
+                        request?.status === "approved" ? bgSuccess : bgError}>{request?.status}</Small> </TableCell>
                     <TableCell align="right">
-                      <IconButton onClick={() => { navigate(`details/${request.id}`, { state: request }) }}>
+                      <IconButton onClick={() => { navigate(`details/${request?.id}`, { state: request }) }}>
                         <Icon title="more details" color="info">info</Icon>
                       </IconButton>
-                      {/* <IconButton
-                        onClick={() => navigate(`update/${request.id}`, { state: request })}
-                        title="update">
-                        <Icon color="info">edit</Icon>
-                      </IconButton>
-                      <IconButton onClick={() => { handleOpenDelete(request?.id) }}>
-                        <Icon title="delete" color="error">close</Icon>
-                      </IconButton> */}
+                      {
+                        request?.status === "pending" || request?.status === "missing information" ?
+                          <IconButton
+                            onClick={() => navigate(`update/${request.id}`, { state: request })}
+                            title="update">
+                            <Icon color="info">edit</Icon>
+                          </IconButton> : null
+                      }
+                      {
+                        request?.status === "pending" ?
+                          <IconButton onClick={() => { handleOpenDelete(request?.id) }}>
+                            <Icon title="delete" color="error">close</Icon>
+                          </IconButton> : null
+                      }
+                      {
+                        request?.status === "approved" && request?.tenderPublished === false ?
+                          <IconButton onClick={() => { navigate("/tenders/create", { state: request }) }}>
+                            <Icon title="create tender" color="info">work</Icon>
+                          </IconButton> : null
+                      }
                     </TableCell>
                   </TableRow>
                 ))}
