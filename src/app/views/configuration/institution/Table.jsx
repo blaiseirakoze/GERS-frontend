@@ -78,7 +78,7 @@ const Users = () => {
   // get users
   const getUsers = async () => {
     try {
-      const url = `/user/view?role=requester`;
+      const url = `/user/view?role=company`;
       const headers = {
         "Content-Type": "application/json",
       };

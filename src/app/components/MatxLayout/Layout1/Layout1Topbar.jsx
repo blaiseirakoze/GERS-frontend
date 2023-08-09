@@ -22,6 +22,7 @@ import { topBarHeight } from 'app/utils/constant';
 import { Span } from '../../Typography';
 import NotificationBar from '../../NotificationBar/NotificationBar';
 import ShoppingCart from '../../ShoppingCart';
+import jwtDecode from "jwt-decode";
 
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
   color: theme.palette.text.primary
@@ -101,7 +102,9 @@ const Layout1Topbar = () => {
     }
     updateSidebarMode({ mode });
   };
-
+  const accessToken = localStorage.getItem("accessToken");
+  const decodedToken = accessToken && jwtDecode(accessToken);
+  const role = decodedToken?.userRole;
   return (
     <TopbarRoot>
       <TopbarContainer>
@@ -139,7 +142,7 @@ const Layout1Topbar = () => {
               <UserMenu>
                 <Hidden xsDown>
                   <Span>
-                    Hi <strong>{user.name}</strong>
+                     <strong>{role}</strong>
                   </Span>
                 </Hidden>
                 <Avatar src={user.avatar} sx={{ cursor: 'pointer' }} />

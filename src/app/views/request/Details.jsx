@@ -197,15 +197,11 @@ const Details = () => {
             onChange={newContent => { }}
           />
         </SimpleCard>
-        <SimpleCard title="Supporting Document">
+        {/* <SimpleCard title="Supporting Document">
           <div className="bg-secondary py-2 px-4 rounded text-white fw-bold d-flex" style={{ width: "20%" }}>
             <span>{request?.documents}</span> <IconButton className="text-white"> <Icon>visibility</Icon> </IconButton>
           </div>
-
-          {/* <object data={`${"file:///home/irakoze/Documents/projects/my-projects/approval-system/files/project-files"}/${request?.documents}#view=Fit&toolbar=0&statusbar=0&messages=0&navpanes=0&scrollbar=0`} type="application/pdf" style={{ display: "inline-block" }} width={"60%"} height={"600"}>
-            <embed src={`${"file:///home/irakoze/Documents/projects/my-projects/approval-system/files/project-files"}/${request?.documents}`} type="application/pdf" />
-          </object> */}
-        </SimpleCard>
+        </SimpleCard> */}
         <SimpleCard title="Request Process">
           {
             request?.requestProcess?.map((process, index) => {
