@@ -18,13 +18,6 @@ export const navigations = [
     ]
   },
   {
-    name: 'Bids',
-    icon: 'note',
-    children: [
-      { name: 'Bids', path: '/material/table', iconText: 'T' },
-    ]
-  },
-  {
     name: 'Configuration',
     icon: 'settings',
     children: [

@@ -131,6 +131,7 @@ const Form = () => {
         }
         setState({ ...state, [event.target.name]: event.target.value });
     };
+    console.log("doc ------------------- ", doc);
     return (
         <Container>
             <Box className="breadcrumb">

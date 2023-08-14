@@ -24,6 +24,7 @@ import JoditEditor from 'jodit-react';
 import { useRef } from 'react';
 import { Fab } from '@mui/material';
 import ChangeStatus from "./ChangeStatus";
+import jwtDecode from "jwt-decode";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -135,6 +136,10 @@ const Details = () => {
     getRequests();
   }, []);
 
+  const accessToken = localStorage.getItem("accessToken");
+  const decodedToken = accessToken && jwtDecode(accessToken);
+  const role = decodedToken?.userRole;
+
   return (
     <Container>
       <ChangeStatus
@@ -156,7 +161,7 @@ const Details = () => {
                   request?.status === "approved" ? bgSuccess : bgError}>{request.status}</Small>
             </div>
             {
-              request?.status === "pending" ?
+              request?.status === "pending" && role==="risa" ?
                 <div>
                   <StyledButton onClick={() => handleOpenChangeStatus("missing information", "missing information")} variant="outlined" color="info">
                     Missing info
