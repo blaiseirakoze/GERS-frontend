@@ -161,26 +161,6 @@ const Requests = () => {
                       <IconButton onClick={() => { navigate(`details/${tender?.id}`, { state: tender }) }}>
                         <Icon title="more details" color="info">info</Icon>
                       </IconButton>
-                      {/* {
-                        request?.status === "pending" || request?.status === "missing information" ?
-                          <IconButton
-                            onClick={() => navigate(`update/${request.id}`, { state: request })}
-                            title="update">
-                            <Icon color="info">edit</Icon>
-                          </IconButton> : null
-                      }
-                      {
-                        request?.status === "pending" ?
-                          <IconButton onClick={() => { handleOpenDelete(request?.id) }}>
-                            <Icon title="delete" color="error">close</Icon>
-                          </IconButton> : null
-                      }
-                      {
-                        request?.status === "approved" ?
-                          <IconButton onClick={() => { navigate("/tenders/create")}}>
-                            <Icon title="create tender" color="info">work</Icon>
-                          </IconButton> : null
-                      } */}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -1,5 +1,5 @@
 import { Breadcrumb, SimpleCard } from "app/components";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "../../store/helpers/axios";
 import { useEffect, useState } from "react";
 import {
@@ -46,6 +46,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import jwtDecode from "jwt-decode";
+import { saveAs } from "file-saver";
+import BasicModal from "app/components/dialog/ViewModal";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -86,13 +88,6 @@ const TextField = styled(TextValidator)(() => ({
 }));
 
 const Details = () => {
-  const { palette } = useTheme();
-  const bgError = palette.error.main;
-  const bgSuccess = palette.success.main;
-  const bgWarning = palette.warning.main;
-  const bgInfo = palette.info.main;
-  const bgSecondary = palette.secondary.main;
-
   const editor = useRef(null);
   const location = useLocation();
   const tender = location?.state;
@@ -104,7 +99,7 @@ const Details = () => {
   const [content, setContent] = useState(tender?.reason);
 
   const navigate = useNavigate();
-  const [tenders, setRequests] = useState([]);
+  const [bids, setBids] = useState([]);
   const [open, setOpen] = useState(false);
   const [changeStatusInfo, setChangeStatusInfo] = useState({
     status: "",
@@ -133,15 +128,15 @@ const Details = () => {
   const handleCloseChangeStatus = () => setOpen(false);
 
   // get tenders
-  const getRequests = async () => {
+  const getBids = async () => {
     try {
-      const url = `/tender/view`;
+      const url = `/bid/view-by-tender/${tender?.id}`;
       const headers = {
         "Content-Type": "application/json",
       };
       const method = "get";
       const { data } = await axios({ method, headers, url });
-      setRequests(data?.data);
+      setBids(data?.data);
     } catch (error) {}
   };
 
@@ -168,28 +163,46 @@ const Details = () => {
         });
         const url = `/bid/create`;
         const headers = {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
+          Accept: "application/json, multipart/form-data, */*",
         };
         const method = "post";
         const info = new FormData();
-        console.log("doc ------------------ ", typeof(doc));
         info.append("tenderId", tender?.id);
         for (let i = 0; i < doc.length; i++) {
           info.append("bidDocuments", doc[i]);
         }
-
-        console.log("info ------------ ",   );
-
         await axios({ method, headers, url, data: info });
         // navigate("/tenders");
         setOpen(false);
         setOpenBidForm(false);
+        getBids();
+        // navigate("")
       }
     } catch (error) {
       setAlert({
         ...alert,
         error: true,
-        message: error?.response?.data?.message.toString(),
+        message: error?.response?.data?.message?.toString(),
+      });
+    }
+  };
+
+  // approve bid
+  const HandleApproveBid = async (bidId) => {
+    try {
+      const url = `/bid/change-status?tenderId=${tender?.id}&id=${bidId}`;
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      const method = "put";
+      await axios({ method, headers, url });
+      getBids();
+    } catch (error) {
+      setAlert({
+        ...alert,
+        error: true,
+        message: error?.response?.data?.message?.toString(),
       });
     }
   };
@@ -208,15 +221,32 @@ const Details = () => {
   const handleClose = () => setOpenBidForm(false);
 
   useEffect(() => {
-    getRequests();
+    getBids();
   }, []);
 
   const accessToken = localStorage.getItem("accessToken");
   const decodedToken = accessToken && jwtDecode(accessToken);
   const role = decodedToken?.userRole;
 
+  // open document
+  const [openDocument, setOpenDocument] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const handleOpenDocument = (fileName) => {
+    setFileName(fileName);
+    setOpenDocument(true);
+  };
+  const handleCloseDocument = () => setOpenDocument(false);
+
+  const [showBid, setShowBid] = useState(true);
+  const [showTenderDetails, setShowTenderDetails] = useState(true);
+  const [showContract, setShowContract] = useState(true);
   return (
     <Container>
+      <BasicModal
+        open={openDocument}
+        handleClose={handleCloseDocument}
+        fileName={fileName && fileName}
+      />
       <ChangeStatus
         open={open}
         handleClose={handleCloseChangeStatus}
@@ -234,145 +264,378 @@ const Details = () => {
         />
       </Box>
       <Stack spacing={3}>
-        <SimpleCard title={tender?.name}>
+        <SimpleCard
+          title={tender?.name}
+          show={showTenderDetails}
+          setShow={setShowTenderDetails}
+        >
           {/* <div className="d-flex justify-content-between fw-bold text-capitalize mb-4">
             {tender?.name}
           </div> */}
-          <div className="d-flex justify-content-between w-50">
-            <Stack spacing={2} width="100%" overflow="auto">
-              <div className="text-capitalize ">open date:</div>
-              <div className="text-capitalize ">close date: </div>
-              <div className="text-capitalize ">Description: </div>
-            </Stack>
-            <Stack spacing={2} width="100%" overflow="auto">
-              <div className="fw-bold text-capitalize ">
-                {" "}
-                {moment(tender?.openDate).format("DD-MM-yyyy")}{" "}
-              </div>
-              <div className="fw-bold text-capitalize ">
-                {" "}
-                {moment(tender?.closeDate).format("DD-MM-yyyy")}{" "}
-              </div>
-              <div className="fw-bold text-capitalize ">
-                {" "}
-                {tender?.description}{" "}
-              </div>
-            </Stack>
-          </div>
+          {showTenderDetails ? (
+            <div className="d-flex justify-content-between w-50">
+              <Stack spacing={2} width="100%" overflow="auto">
+                <div className="text-capitalize ">open date:</div>
+                <div className="text-capitalize ">close date: </div>
+                <div className="text-capitalize ">Description: </div>
+              </Stack>
+              <Stack spacing={2} width="100%" overflow="auto">
+                <div className="fw-bold text-capitalize ">
+                  {" "}
+                  {moment(tender?.openDate).format("DD-MM-yyyy")}{" "}
+                </div>
+                <div className="fw-bold text-capitalize ">
+                  {" "}
+                  {moment(tender?.closeDate).format("DD-MM-yyyy")}{" "}
+                </div>
+                <div className="fw-bold text-capitalize ">
+                  {" "}
+                  {tender?.description}{" "}
+                </div>
+              </Stack>
+            </div>
+          ) : null}
         </SimpleCard>
 
-        <SimpleCard title="Bid Information">
-          <Dialog
-            open={openBidForm}
-            onClose={handleClose}
-            aria-labelledby="form-dialog-title"
-          >
-            <DialogTitle id="form-dialog-title">Bid form</DialogTitle>
-            {alert?.error ? (
-              <Alert
+        <SimpleCard title="Bid Information" show={showBid} setShow={setShowBid}>
+          {showBid ? (
+            <div>
+              <Dialog
+                open={openBidForm}
                 onClose={handleClose}
-                sx={{ m: 1 }}
-                severity="error"
-                variant="filled"
+                aria-labelledby="form-dialog-title"
               >
-                {alert?.message}
-              </Alert>
-            ) : null}
-            <DialogContent>
-              <ValidatorForm onSubmit={handleSubmit} onError={() => null}>
-                <Grid container spacing={6}>
-                  {tender?.tenderDocuments?.map((dc, index) => {
-                    return (
-                      <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mt: 2 }}>
-                        <label htmlFor="">{dc.name}</label>
-                        <TextField
-                          type="file"
-                          name={dc.name}
-                          label={""}
-                          onChange={handleChange}
-                          // value={["cv"]}
-                          // validators={["required"]}
-                          // errorMessages={["this field is required"]}
-                        />
-                      </Grid>
-                    );
-                  })}
-                </Grid>
-                <div className="text-end">
-                  <Button
-                    onClick={handleClose}
-                    color="primary"
-                    variant="outlined"
-                    type="button"
+                <DialogTitle id="form-dialog-title">Bid form</DialogTitle>
+                {alert?.error ? (
+                  <Alert
+                    onClose={handleClose}
+                    sx={{ m: 1 }}
+                    severity="error"
+                    variant="filled"
                   >
-                    <Icon>cancel</Icon>
-                    <Span sx={{ pl: 1, textTransform: "capitalize" }}>
-                      Cancel
-                    </Span>
-                  </Button>
-                  <Button color="primary" variant="contained" type="submit">
-                    <Icon>send</Icon>
-                    <Span sx={{ pl: 1, textTransform: "capitalize" }}>
-                      {"Apply"}
-                    </Span>
-                  </Button>
-                </div>
-              </ValidatorForm>
-            </DialogContent>
-          </Dialog>
-          <Box className="breadcrumb d-flex justify-content-between align-items-center">
-            <Typography>Bidders list</Typography>
-            {role === "supplier" ? (
-              <StyledButton
-                onClick={handleClickOpen}
-                variant="contained"
-                color="primary"
-              >
-                Send your application
-              </StyledButton>
-            ) : null}
-          </Box>
-          <Box width="100%" overflow="auto">
-            <StyledTable>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="left">Bidder name</TableCell>
-                  <TableCell align="center">Description</TableCell>
-                  <TableCell align="center">Documents</TableCell>
-                  <TableCell align="center">Submited at</TableCell>
-                  <TableCell align="center">Status</TableCell>
-                  <TableCell align="right">Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tenders
-                  ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((tender, index) => (
-                    <TableRow key={index}>
-                      <TableCell align="left">{""}</TableCell>
-                      <TableCell align="center">{""}</TableCell>
-                      <TableCell align="center">{""}</TableCell>
-                      <TableCell align="center">{""}</TableCell>
-                      <TableCell align="center">{""}</TableCell>
-                      <TableCell align="right"></TableCell>
+                    {alert?.message}
+                  </Alert>
+                ) : null}
+                <DialogContent>
+                  <ValidatorForm onSubmit={handleSubmit} onError={() => null}>
+                    <Grid container spacing={6}>
+                      {tender?.tenderDocuments?.map((dc, index) => {
+                        return (
+                          <Grid
+                            item
+                            lg={6}
+                            md={6}
+                            sm={12}
+                            xs={12}
+                            sx={{ mt: 2 }}
+                          >
+                            <label htmlFor="">{dc.name}</label>
+                            <TextField
+                              type="file"
+                              name={dc.name}
+                              label={""}
+                              onChange={handleChange}
+                              // value={["cv"]}
+                              // validators={["required"]}
+                              // errorMessages={["this field is required"]}
+                            />
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
+                    <div className="text-end">
+                      <Button
+                        onClick={handleClose}
+                        color="primary"
+                        variant="outlined"
+                        type="button"
+                      >
+                        <Icon>cancel</Icon>
+                        <Span sx={{ pl: 1, textTransform: "capitalize" }}>
+                          Cancel
+                        </Span>
+                      </Button>
+                      <Button color="primary" variant="contained" type="submit">
+                        <Icon>send</Icon>
+                        <Span sx={{ pl: 1, textTransform: "capitalize" }}>
+                          {"Apply"}
+                        </Span>
+                      </Button>
+                    </div>
+                  </ValidatorForm>
+                </DialogContent>
+              </Dialog>
+              <Box className="breadcrumb d-flex justify-content-between align-items-center">
+                <Typography>Bidders list</Typography>
+                {role === "supplier" ? (
+                  bids.length === 0 ? (
+                    <StyledButton
+                      onClick={handleClickOpen}
+                      variant="contained"
+                      color="primary"
+                    >
+                      Send your application
+                    </StyledButton>
+                  ) : (
+                    <div className="fst-italic fw-bold text-success border-1 rounded">
+                      You have applied to this tender
+                    </div>
+                  )
+                ) : null}
+              </Box>
+              <Box width="100%" overflow="auto">
+                <StyledTable>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="left">Bidder name</TableCell>
+                      <TableCell align="center">Description</TableCell>
+                      <TableCell align="center">Documents</TableCell>
+                      <TableCell align="center">Submited at</TableCell>
+                      <TableCell align="center">Status</TableCell>
+                      {role === "risa" || role === "admin" ? (
+                        <TableCell align="right">Action</TableCell>
+                      ) : null}
                     </TableRow>
-                  ))}
-              </TableBody>
-            </StyledTable>
+                  </TableHead>
+                  <TableBody>
+                    {bids
+                      ?.slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((bid, index) => (
+                        <TableRow key={index}>
+                          <TableCell align="left">
+                            {bid.bidBy.firstName} {bid.bidBy.lastName}
+                          </TableCell>
+                          <TableCell align="center">
+                            {bid.description}
+                          </TableCell>
+                          <TableCell className="" align="center">
+                            {bid?.documents.split(",")?.map((doc) => {
+                              return (
+                                <div
+                                  onClick={() => handleOpenDocument(doc)}
+                                  className=" cursor-pointer lowercase bg-secondary m-2 p-2 rounded text-white"
+                                >
+                                  {doc}
+                                </div>
+                              );
+                            })}
+                          </TableCell>
+                          <TableCell align="center">
+                            {moment(bid.createdAt).format("DD-MM-yyyy")}
+                          </TableCell>
+                          <TableCell align="center">
+                            <span
+                              class={
+                                bid.status === "approved"
+                                  ? "badge bg-success"
+                                  : bid.status === "rejected"
+                                  ? "badge bg-danger"
+                                  : "badge bg-warning"
+                              }
+                            >
+                              {bid.status}
+                            </span>
+                          </TableCell>
+                          {role === "risa" || role === "admin" ? (
+                            <TableCell align="right">
+                              {bid.status === "pending" ? (
+                                <StyledButton
+                                  onClick={() => HandleApproveBid(bid?.id)}
+                                  variant="outlined"
+                                  color="success"
+                                >
+                                  Approve
+                                </StyledButton>
+                              ) : null}
+                            </TableCell>
+                          ) : null}
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </StyledTable>
 
-            <TablePagination
-              sx={{ px: 2 }}
-              page={page}
-              component="div"
-              rowsPerPage={rowsPerPage}
-              count={""}
-              onPageChange={handleChangePage}
-              rowsPerPageOptions={[5, 10, 25]}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              nextIconButtonProps={{ "aria-label": "Next Page" }}
-              backIconButtonProps={{ "aria-label": "Previous Page" }}
-            />
-          </Box>
+                <TablePagination
+                  sx={{ px: 2 }}
+                  page={page}
+                  component="div"
+                  rowsPerPage={rowsPerPage}
+                  count={""}
+                  onPageChange={handleChangePage}
+                  rowsPerPageOptions={[5, 10, 25]}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  nextIconButtonProps={{ "aria-label": "Next Page" }}
+                  backIconButtonProps={{ "aria-label": "Previous Page" }}
+                />
+              </Box>
+            </div>
+          ) : null}
+        </SimpleCard>
+
+
+        <SimpleCard title="Contract and deliverables" show={showContract} setShow={setShowContract}>
+          {showContract ? (
+            <div>
+              <Dialog
+                open={openBidForm}
+                onClose={handleClose}
+                aria-labelledby="form-dialog-title"
+              >
+                <DialogTitle id="form-dialog-title">Bid form</DialogTitle>
+                {alert?.error ? (
+                  <Alert
+                    onClose={handleClose}
+                    sx={{ m: 1 }}
+                    severity="error"
+                    variant="filled"
+                  >
+                    {alert?.message}
+                  </Alert>
+                ) : null}
+                <DialogContent>
+                  <ValidatorForm onSubmit={handleSubmit} onError={() => null}>
+                    <Grid container spacing={6}>
+                      {tender?.tenderDocuments?.map((dc, index) => {
+                        return (
+                          <Grid
+                            item
+                            lg={6}
+                            md={6}
+                            sm={12}
+                            xs={12}
+                            sx={{ mt: 2 }}
+                          >
+                            <label htmlFor="">{dc.name}</label>
+                            <TextField
+                              type="file"
+                              name={dc.name}
+                              label={""}
+                              onChange={handleChange}
+                              // value={["cv"]}
+                              // validators={["required"]}
+                              // errorMessages={["this field is required"]}
+                            />
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
+                    <div className="text-end">
+                      <Button
+                        onClick={handleClose}
+                        color="primary"
+                        variant="outlined"
+                        type="button"
+                      >
+                        <Icon>cancel</Icon>
+                        <Span sx={{ pl: 1, textTransform: "capitalize" }}>
+                          Cancel
+                        </Span>
+                      </Button>
+                      <Button color="primary" variant="contained" type="submit">
+                        <Icon>send</Icon>
+                        <Span sx={{ pl: 1, textTransform: "capitalize" }}>
+                          {"Apply"}
+                        </Span>
+                      </Button>
+                    </div>
+                  </ValidatorForm>
+                </DialogContent>
+              </Dialog>
+              <Box className="breadcrumb d-flex justify-content-between align-items-center">
+                <Typography>Documents list</Typography>
+                {role === "supplier" ? (
+                  bids.length === 0 ? (
+                    <StyledButton
+                      onClick={handleClickOpen}
+                      variant="contained"
+                      color="primary"
+                    >
+                      Send your application
+                    </StyledButton>
+                  ) : (
+                    <div className="fst-italic fw-bold text-success border-1 rounded">
+                      You have applied to this tender
+                    </div>
+                  )
+                ) : null}
+              </Box>
+              <Box width="100%" overflow="auto">
+                <StyledTable>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="left">Doncument name</TableCell>
+                      <TableCell align="center">Description</TableCell>
+                      <TableCell align="center">Document file</TableCell>
+                      <TableCell align="center">Submited at</TableCell>
+                      {/* <TableCell align="center">Status</TableCell> */}
+                  
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {/* {bids
+                      ?.slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((bid, index) => ( */}
+                        <TableRow key={"index"}>
+                          <TableCell align="left">
+                            {/* {bid.bidBy.firstName} {bid.bidBy.lastName} */}
+                          </TableCell>
+                          <TableCell align="center">
+                            {/* {bid.description} */}
+                          </TableCell>
+                          <TableCell className="" align="center">
+                            {/* {bid?.documents.split(",")?.map((doc) => {
+                              return (
+                                <div
+                                  onClick={() => handleOpenDocument(doc)}
+                                  className=" cursor-pointer lowercase bg-secondary m-2 p-2 rounded text-white"
+                                >
+                                  {doc}
+                                </div>
+                              );
+                            })} */}
+                          </TableCell>
+                          <TableCell align="center">
+                            {/* {moment(bid.createdAt).format("DD-MM-yyyy")} */}
+                          </TableCell>
+                          {/* <TableCell align="center">
+                            <span
+                              class={
+                                bid.status === "approved"
+                                  ? "badge bg-success"
+                                  : bid.status === "rejected"
+                                  ? "badge bg-danger"
+                                  : "badge bg-warning"
+                              }
+                            >
+                              {bid.status}
+                            </span>
+                          </TableCell> */}
+                          
+                        </TableRow>
+                      {/* ))} */}
+                  </TableBody>
+                </StyledTable>
+
+                <TablePagination
+                  sx={{ px: 2 }}
+                  page={page}
+                  component="div"
+                  rowsPerPage={rowsPerPage}
+                  count={""}
+                  onPageChange={handleChangePage}
+                  rowsPerPageOptions={[5, 10, 25]}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  nextIconButtonProps={{ "aria-label": "Next Page" }}
+                  backIconButtonProps={{ "aria-label": "Previous Page" }}
+                />
+              </Box>
+            </div>
+          ) : null}
         </SimpleCard>
       </Stack>
     </Container>
