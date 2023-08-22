@@ -17,18 +17,19 @@ const SimpleCard = ({ children, title, subtitle, show, setShow }) => {
     <CardRoot elevation={6}>
       <div className=" d-flex align-items-center ">
         <CardTitle subtitle={subtitle}>{title}</CardTitle>
-
-        <IconButton>
-          {show ? (
-            <Icon onClick={() => setShow(false)} title="more details">
-              visibilityOff
-            </Icon>
-          ) : (
-            <Icon onClick={() => setShow(true)} title="more details">
-              visibility
-            </Icon>
-          )}
-        </IconButton>
+        {show === true || show === false ? (
+          <IconButton>
+            {show ? (
+              <Icon onClick={() => setShow(false)} title="more details">
+                visibilityOff
+              </Icon>
+            ) : (
+              <Icon onClick={() => setShow(true)} title="more details">
+                visibility
+              </Icon>
+            )}
+          </IconButton>
+        ) : null}
       </div>
       {subtitle && <Box sx={{ mb: 2 }}>{subtitle}</Box>}
       {children}

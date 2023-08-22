@@ -23,8 +23,7 @@ export const navigations = [
     children: [
       { name: 'Roles', path: '/configuration/roles', iconText: 'T' },
       { name: 'Institutions', path: '/configuration/institutions', iconText: 'T' },
-      { name: 'Supplier', path: '/configuration/supplier', iconText: 'T' },
-      { name: 'Risa', path: '/configuration/Risa', iconText: 'T' },
+      { name: 'Users', path: '/configuration/users', iconText: 'T' },
       { name: 'Logs', path: '/configuration/logs', iconText: 'T' },
     ]
   },
