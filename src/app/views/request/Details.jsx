@@ -24,6 +24,7 @@ import JoditEditor from 'jodit-react';
 import { useRef } from 'react';
 import { Fab } from '@mui/material';
 import ChangeStatus from "./ChangeStatus";
+import jwtDecode from "jwt-decode";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -135,6 +136,10 @@ const Details = () => {
     getRequests();
   }, []);
 
+  const accessToken = localStorage.getItem("accessToken");
+  const decodedToken = accessToken && jwtDecode(accessToken);
+  const role = decodedToken?.userRole;
+
   return (
     <Container>
       <ChangeStatus
@@ -156,7 +161,7 @@ const Details = () => {
                   request?.status === "approved" ? bgSuccess : bgError}>{request.status}</Small>
             </div>
             {
-              request?.status === "pending" ?
+              request?.status === "pending" && role==="risa" ?
                 <div>
                   <StyledButton onClick={() => handleOpenChangeStatus("missing information", "missing information")} variant="outlined" color="info">
                     Missing info
@@ -197,15 +202,11 @@ const Details = () => {
             onChange={newContent => { }}
           />
         </SimpleCard>
-        <SimpleCard title="Supporting Document">
+        {/* <SimpleCard title="Supporting Document">
           <div className="bg-secondary py-2 px-4 rounded text-white fw-bold d-flex" style={{ width: "20%" }}>
             <span>{request?.documents}</span> <IconButton className="text-white"> <Icon>visibility</Icon> </IconButton>
           </div>
-
-          {/* <object data={`${"file:///home/irakoze/Documents/projects/my-projects/approval-system/files/project-files"}/${request?.documents}#view=Fit&toolbar=0&statusbar=0&messages=0&navpanes=0&scrollbar=0`} type="application/pdf" style={{ display: "inline-block" }} width={"60%"} height={"600"}>
-            <embed src={`${"file:///home/irakoze/Documents/projects/my-projects/approval-system/files/project-files"}/${request?.documents}`} type="application/pdf" />
-          </object> */}
-        </SimpleCard>
+        </SimpleCard> */}
         <SimpleCard title="Request Process">
           {
             request?.requestProcess?.map((process, index) => {

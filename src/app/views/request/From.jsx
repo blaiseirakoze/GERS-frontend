@@ -53,7 +53,8 @@ const Form = () => {
     const editor = useRef(null);
     const location = useLocation();
     const request = location?.state;
-
+    const info = new FormData();
+    
     function handleClose(_, reason) {
         if (reason === 'clickaway') {
             return;
@@ -103,8 +104,8 @@ const Form = () => {
                 "Accept": "application/json, multipart/form-data, */*"
             };
             const method = "put";
-            const info = new FormData();
-            info.append("documents", doc);
+            // const info = new FormData();
+            // info.append("documents", doc);
             info.append("reason", content);
             info.append("title", title);
             const { data } = await axios({ method, headers, url, data: info });
@@ -172,7 +173,7 @@ const Form = () => {
                                         />
                                     </div>
 
-                                    <div>
+                                    {/* <div>
                                         <label htmlFor="">Supporting document(s)</label>
                                         <TextField
                                             type="file"
@@ -180,7 +181,7 @@ const Form = () => {
                                             onChange={handleChange}
                                             value={documents || ""}
                                         />
-                                    </div>
+                                    </div> */}
                                 </Grid>
                             </Grid>
                             <div className='text-end'>

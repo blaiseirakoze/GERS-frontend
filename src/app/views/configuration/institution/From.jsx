@@ -77,7 +77,7 @@ const Form = () => {
                 "Content-Type": "application/json",
             };
             const method = "post";
-            const role = await roles.find(role => role.name === "requester");
+            const role = await roles.find(role => role.name === "company");
             const { data } = await axios({ method, headers, url, data: { ...state, roleId: role.id } });
             // toast.success(data?.message);
             navigate("/configuration/institutions");
@@ -194,21 +194,7 @@ const Form = () => {
                                 </Grid>
 
                                 <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mt: 2 }}>
-                                    {/* <ReactSelect
-                                        value={state?.role}
-                                        name="roleId"
-                                        styles={{
-                                            control: (baseStyles, state) => ({
-                                                ...baseStyles,
-                                                padding: 7,
-                                                marginBottom: 18
-                                            }),
-                                        }}
-                                        required
-                                        options={
-                                            roles?.map((role) => ({ value: role.id, label: role.label }))
-                                        }
-                                        onChange={(v) => setState({ ...state, role: v })} /> */}
+                                 
                                     <TextField
                                         type="text"
                                         name="username"
@@ -219,15 +205,7 @@ const Form = () => {
                                         label="Username"
                                         validators={["required"]}
                                     />
-                                    <TextField
-                                        type="text"
-                                        name="phone"
-                                        label="Phone"
-                                        onChange={handleChange}
-                                        value={phone || ""}
-                                        errorMessages={["this field is required"]}
-                                        validators={["required", "minStringLength:10", "maxStringLength: 10"]}
-                                    />
+          
 
                                 </Grid>
                             </Grid>

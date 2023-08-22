@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import moment from "moment";
 import ConfirmationDialog from "app/components/dialog/ConfirmationDialog";
+import jwtDecode from "jwt-decode";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -42,15 +43,15 @@ const StyledTable = styled(Table)(() => ({
   },
 }));
 
-const Small = styled('small')(({ bgcolor }) => ({
+const Small = styled("small")(({ bgcolor }) => ({
   width: 50,
   height: 15,
-  color: '#fff',
-  padding: '2px 8px',
-  borderRadius: '4px',
-  overflow: 'hidden',
+  color: "#fff",
+  padding: "2px 8px",
+  borderRadius: "4px",
+  overflow: "hidden",
   background: bgcolor,
-  boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 2px 2px 0 rgba(0, 0, 0, 0.24)',
+  boxShadow: "0 0 2px 0 rgba(0, 0, 0, 0.12), 0 2px 2px 0 rgba(0, 0, 0, 0.24)",
 }));
 
 const Requests = () => {
@@ -88,9 +89,8 @@ const Requests = () => {
       const method = "get";
       const { data } = await axios({ method, headers, url });
       setRequests(data?.data);
-    } catch (error) {
-    }
-  }
+    } catch (error) {}
+  };
 
   // handle delete
   const handleDelete = async () => {
@@ -103,19 +103,22 @@ const Requests = () => {
       await axios({ method, headers, url });
       getRequests();
       setOpenDelete(false);
-    } catch (error) {
-    }
-  }
+    } catch (error) {}
+  };
 
   const handleCloseDelete = () => setOpenDelete(false);
   const handleOpenDelete = (id) => {
     setId(id);
-    setOpenDelete(true)
+    setOpenDelete(true);
   };
 
   useEffect(() => {
     getRequests();
   }, []);
+
+  const accessToken = localStorage.getItem("accessToken");
+  const decodedToken = accessToken && jwtDecode(accessToken);
+  const role = decodedToken?.userRole;
 
   return (
     <Container>
@@ -124,14 +127,24 @@ const Requests = () => {
         message={"Are you sure you want to delete this request?"}
         action={handleDelete}
         handleClose={handleCloseDelete}
-        open={openDelete} />
+        open={openDelete}
+      />
       <Box className="breadcrumb d-flex justify-content-between">
-        <Breadcrumb routeSegments={[{ name: "Request", path: "/requests" }, { name: "Requests" }]} />
-        <StyledButton
-          onClick={() => navigate("create")}
-          variant="contained" color="primary">
-          Add new
-        </StyledButton>
+        <Breadcrumb
+          routeSegments={[
+            { name: "Request", path: "/requests" },
+            { name: "Requests" },
+          ]}
+        />
+        {role === "company" ? (
+          <StyledButton
+            onClick={() => navigate("create")}
+            variant="contained"
+            color="primary"
+          >
+            Add new
+          </StyledButton>
+        ) : null}
       </Box>
 
       <SimpleCard title="Requests">
@@ -147,40 +160,80 @@ const Requests = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {requests?.
-                slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).
-                map((request, index) => (
+              {requests
+                ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((request, index) => (
                   <TableRow key={index}>
                     <TableCell align="left">{request?.title}</TableCell>
-                    <TableCell align="center">{request?.requestedBy?.firstName} {request?.requestedBy?.lastName}</TableCell>
-                    <TableCell align="center">{moment(request?.createdAt).format("DD-MM-yyyy")}</TableCell>
-                    <TableCell align="center"> <Small bgcolor={request?.status === "pending" ? bgWarning :
-                      request?.status === "missing information" ? bgInfo :
-                        request?.status === "approved" ? bgSuccess : bgError}>{request?.status}</Small> </TableCell>
+                    <TableCell align="center">
+                      {request?.requestedBy?.firstName}{" "}
+                      {request?.requestedBy?.lastName}
+                    </TableCell>
+                    <TableCell align="center">
+                      {moment(request?.createdAt).format("DD-MM-yyyy")}
+                    </TableCell>
+                    <TableCell align="center">
+                      {" "}
+                      <Small
+                        bgcolor={
+                          request?.status === "pending"
+                            ? bgWarning
+                            : request?.status === "missing information"
+                            ? bgInfo
+                            : request?.status === "approved"
+                            ? bgSuccess
+                            : bgError
+                        }
+                      >
+                        {request?.status}
+                      </Small>{" "}
+                    </TableCell>
                     <TableCell align="right">
-                      <IconButton onClick={() => { navigate(`details/${request?.id}`, { state: request }) }}>
-                        <Icon title="more details" color="info">info</Icon>
+                      <IconButton
+                        onClick={() => {
+                          navigate(`details/${request?.id}`, {
+                            state: request,
+                          });
+                        }}
+                      >
+                        <Icon title="more details" color="info">
+                          info
+                        </Icon>
                       </IconButton>
-                      {
-                        request?.status === "pending" || request?.status === "missing information" ?
-                          <IconButton
-                            onClick={() => navigate(`update/${request.id}`, { state: request })}
-                            title="update">
-                            <Icon color="info">edit</Icon>
-                          </IconButton> : null
-                      }
-                      {
-                        request?.status === "pending" ?
-                          <IconButton onClick={() => { handleOpenDelete(request?.id) }}>
-                            <Icon title="delete" color="error">close</Icon>
-                          </IconButton> : null
-                      }
-                      {
-                        request?.status === "approved" && request?.tenderPublished === false ?
-                          <IconButton onClick={() => { navigate("/tenders/create", { state: request }) }}>
-                            <Icon title="create tender" color="info">work</Icon>
-                          </IconButton> : null
-                      }
+                      {request?.status === "pending" ||
+                      request?.status === "missing information" ? (
+                        <IconButton
+                          onClick={() =>
+                            navigate(`update/${request.id}`, { state: request })
+                          }
+                          title="update"
+                        >
+                          <Icon color="info">edit</Icon>
+                        </IconButton>
+                      ) : null}
+                      {request?.status === "pending" ? (
+                        <IconButton
+                          onClick={() => {
+                            handleOpenDelete(request?.id);
+                          }}
+                        >
+                          <Icon title="delete" color="error">
+                            close
+                          </Icon>
+                        </IconButton>
+                      ) : null}
+                      {request?.status === "approved" &&
+                      request?.tenderPublished === false ? (
+                        <IconButton
+                          onClick={() => {
+                            navigate("/tenders/create", { state: request });
+                          }}
+                        >
+                          <Icon title="create tender" color="info">
+                            work
+                          </Icon>
+                        </IconButton>
+                      ) : null}
                     </TableCell>
                   </TableRow>
                 ))}
