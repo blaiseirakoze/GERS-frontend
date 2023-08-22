@@ -136,7 +136,7 @@ const Users = () => {
           <StyledTable>
             <TableHead>
               <TableRow>
-                <TableCell align="left">Name</TableCell>
+                {/* <TableCell align="left">Name</TableCell> */}
                 <TableCell align="center">Email</TableCell>
                 <TableCell align="center">Phone</TableCell>
                 <TableCell align="center">Role</TableCell>
@@ -150,7 +150,7 @@ const Users = () => {
                 slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).
                 map((user, index) => (
                   <TableRow key={index}>
-                    <TableCell align="left">{user.firstName} {user.lastName}</TableCell>
+                    {/* <TableCell align="left">{user.firstName} {user.lastName}</TableCell> */}
                     <TableCell align="center">{user.email}</TableCell>
                     <TableCell align="center">{user.phone}</TableCell>
                     <TableCell align="center">{user?.role?.label}</TableCell>
