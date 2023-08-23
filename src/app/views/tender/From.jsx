@@ -191,9 +191,7 @@ const BasicForm = () => {
                     }
                 </SimpleCard>
                 {/* <SimpleCard title="Requester"> */}
-                <Grid item lg={12} md={12} sm={12} xs={12}
-                // sx={{ mb: 6 }}
-                >
+                <Grid item lg={12} md={12} sm={12} xs={12}>
                     <label htmlFor="">Select Request </label>
                     <ReactSelect
                         className='z-3 bg-white'
@@ -251,8 +249,6 @@ const BasicForm = () => {
                 <ValidatorForm onSubmit={handleSubmit} onError={() => null}>
                     <Stack spacing={3}>
                         <SimpleCard title={"Tender Information"} padding={'20px 24px 80px 24px'}>
-
-
                             {/* <div> */}
                             {/* <ValidatorForm onSubmit={isUpdate ? handleUpdate : handleSubmit} onError={() => null}> */}
                             <Grid container spacing={1}>
@@ -305,18 +301,6 @@ const BasicForm = () => {
                                         errorMessages={["this field is required"]}
                                     />
                                 </Grid>
-                                {/* <Grid item lg={6} md={6} sm={12} xs={12} >
-                                    <label htmlFor="">Publish Winner Date <span className='text-danger'>*</span></label>
-                                    <TextField
-                                        type="date"
-                                        name="publishWinnerDate"
-                                        label=""
-                                        onChange={handleChange}
-                                        // value={title || ""}
-                                        validators={["required"]}
-                                        errorMessages={["this field is required"]}
-                                    />
-                                </Grid> */}
                             </Grid>
                         </SimpleCard>
 
@@ -360,8 +344,10 @@ const BasicForm = () => {
                                 </Grid>
                                 <Grid className='d-flex align-items-center justify-content-end' item lg={3} md={3} sm={12} xs={12}>
                                     <Button onClick={() => {
-                                        setDocuments([...documents, { name, description, type }])
-                                    }} color="warning" variant="contained" type="button">
+                                        setDocuments([...documents, { name, description, type }]);
+                                        setState({...state, name:"", description:"", type:""});
+                                    }} 
+                                    color="warning" variant="contained" type="button">
                                         <Span sx={{ pl: 1, textTransform: "capitalize" }}>add</Span>
                                     </Button>
                                 </Grid>
