@@ -42,15 +42,15 @@ const StyledTable = styled(Table)(() => ({
   },
 }));
 
-const Small = styled('small')(({ bgcolor }) => ({
+const Small = styled("small")(({ bgcolor }) => ({
   width: 50,
   height: 15,
-  color: '#fff',
-  padding: '2px 8px',
-  borderRadius: '4px',
-  overflow: 'hidden',
+  color: "#fff",
+  padding: "2px 8px",
+  borderRadius: "4px",
+  overflow: "hidden",
   background: bgcolor,
-  boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 2px 2px 0 rgba(0, 0, 0, 0.24)',
+  boxShadow: "0 0 2px 0 rgba(0, 0, 0, 0.12), 0 2px 2px 0 rgba(0, 0, 0, 0.24)",
 }));
 
 const Users = () => {
@@ -85,9 +85,8 @@ const Users = () => {
       const method = "get";
       const { data } = await axios({ method, headers, url });
       setUsers(data?.data);
-    } catch (error) {
-    }
-  }
+    } catch (error) {}
+  };
 
   // handle delete
   const handleDelete = async () => {
@@ -100,14 +99,13 @@ const Users = () => {
       await axios({ method, headers, url });
       getUsers();
       setOpenDelete(false);
-    } catch (error) {
-    }
-  }
+    } catch (error) {}
+  };
 
   const handleCloseDelete = () => setOpenDelete(false);
   const handleOpenDelete = (id) => {
     setId(id);
-    setOpenDelete(true)
+    setOpenDelete(true);
   };
 
   useEffect(() => {
@@ -121,12 +119,20 @@ const Users = () => {
         message={"Are you sure you want to delete this user?"}
         action={handleDelete}
         handleClose={handleCloseDelete}
-        open={openDelete} />
+        open={openDelete}
+      />
       <Box className="breadcrumb d-flex justify-content-between">
-        <Breadcrumb routeSegments={[{ name: "Configuration", path: "/configuration/users" }, { name: "Users" }]} />
+        <Breadcrumb
+          routeSegments={[
+            { name: "Configuration", path: "/configuration/users" },
+            { name: "Users" },
+          ]}
+        />
         <StyledButton
           onClick={() => navigate("create")}
-          variant="contained" color="primary">
+          variant="contained"
+          color="primary"
+        >
           Add new
         </StyledButton>
       </Box>
@@ -146,24 +152,44 @@ const Users = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users?.
-                slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).
-                map((user, index) => (
+              {users
+                ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((user, index) => (
                   <TableRow key={index}>
-                    <TableCell align="left">{user.firstName} {user.lastName}</TableCell>
+                    <TableCell align="left">
+                      {user.firstName} {user.lastName}
+                    </TableCell>
                     <TableCell align="center">{user.email}</TableCell>
                     <TableCell align="center">{user.phone}</TableCell>
                     <TableCell align="center">{user?.role?.label}</TableCell>
-                    <TableCell align="center">{moment(user.createdAt).format("DD-MM-yyyy")}</TableCell>
-                    <TableCell align="center"> <Small bgcolor={user.status === "active" ? bgSuccess : bgError}>{user.status}</Small> </TableCell>
+                    <TableCell align="center">
+                      {moment(user.createdAt).format("DD-MM-yyyy")}
+                    </TableCell>
+                    <TableCell align="center">
+                      {" "}
+                      <Small
+                        bgcolor={user.status === "active" ? bgSuccess : bgError}
+                      >
+                        {user.status}
+                      </Small>{" "}
+                    </TableCell>
                     <TableCell align="right">
                       <IconButton
-                        onClick={() => navigate(`update/${user.id}`, { state: user })}
-                        title="update">
+                        onClick={() =>
+                          navigate(`update/${user.id}`, { state: user })
+                        }
+                        title="update"
+                      >
                         <Icon color="info">edit</Icon>
                       </IconButton>
-                      <IconButton onClick={() => { handleOpenDelete(user?.id) }}>
-                        <Icon title="delete" color="error">close</Icon>
+                      <IconButton
+                        onClick={() => {
+                          handleOpenDelete(user?.id);
+                        }}
+                      >
+                        <Icon title="delete" color="error">
+                          close
+                        </Icon>
                       </IconButton>
                     </TableCell>
                   </TableRow>
