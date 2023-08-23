@@ -220,14 +220,7 @@ const BasicForm = () => {
           ) : null}
         </SimpleCard>
         {/* <SimpleCard title="Requester"> */}
-        <Grid
-          item
-          lg={12}
-          md={12}
-          sm={12}
-          xs={12}
-          // sx={{ mb: 6 }}
-        >
+        <Grid item lg={12} md={12} sm={12} xs={12}>
           <label htmlFor="">Select Request </label>
           <ReactSelect
             className="z-3 bg-white"
@@ -362,18 +355,6 @@ const BasicForm = () => {
                     errorMessages={["this field is required"]}
                   />
                 </Grid>
-                {/* <Grid item lg={6} md={6} sm={12} xs={12} >
-                                    <label htmlFor="">Publish Winner Date <span className='text-danger'>*</span></label>
-                                    <TextField
-                                        type="date"
-                                        name="publishWinnerDate"
-                                        label=""
-                                        onChange={handleChange}
-                                        // value={title || ""}
-                                        validators={["required"]}
-                                        errorMessages={["this field is required"]}
-                                    />
-                                </Grid> */}
               </Grid>
             </SimpleCard>
 
@@ -434,7 +415,18 @@ const BasicForm = () => {
                 >
                   <Button
                     onClick={() => {
-                      setDocuments([...documents, { name, description, type }]);
+                      if (name !== "" || description !== "" || type !== "") {
+                        setDocuments([
+                          ...documents,
+                          { name, description, type },
+                        ]);
+                        setState({
+                          ...state,
+                          name: "",
+                          description: "",
+                          type: "",
+                        });
+                      }
                     }}
                     color="warning"
                     variant="contained"
