@@ -242,6 +242,7 @@ const Details = () => {
   const accessToken = localStorage.getItem("accessToken");
   const decodedToken = accessToken && jwtDecode(accessToken);
   const role = decodedToken?.userRole;
+  const userId = decodedToken?.userId;
 
   // open document
   const [openDocument, setOpenDocument] = useState(false);
@@ -299,7 +300,7 @@ const Details = () => {
       });
     }
   };
-
+  console.log("tender ------------- ", tenderr);
   return (
     <Container>
       <BasicModal
@@ -547,120 +548,120 @@ const Details = () => {
           ) : null}
         </SimpleCard>
 
-        {/* =================================== start Deliverables ====================================== */}
-        {tenderr?.supplier ? (
-          <SimpleCard
-            title="Deliverables"
-            show={showContract}
-            setShow={setShowContract}
-          >
-            {showContract ? (
-              <div>
-                <Box className="breadcrumb d-flex justify-content-between align-items-center">
-                  <Typography>
-                    This section is for the supplier to upload the required
-                    documents
-                  </Typography>
-                </Box>
-
+        {/* =================================== start Deliverables && confirm Deliverables ====================================== */}
+        {role === "supplier" && tenderr?.supplier.id !== userId ? null : (
+          <>
+            <SimpleCard
+              title="Deliverables"
+              show={showContract}
+              setShow={setShowContract}
+            >
+              {showContract ? (
                 <div>
-                  <ValidatorForm
-                  // onSubmit={isUpdate ? handleUpdate : handleSubmit}
-                  // onError={() => null}
-                  >
-                    <Grid container spacing={6}>
-                      <Grid item lg={6} md={6} sm={6} xs={6} sx={{ mt: 2 }}>
-                        <div className="mb-4">
-                          <label htmlFor="">Delivery Note Document:</label>
-                          {tenderr?.deliveryNote ? (
-                            <div
-                              onClick={() =>
-                                handleOpenDocument(tenderr?.deliveryNote)
-                              }
-                              className=" cursor-pointer lowercase bg-secondary p-3 rounded text-white"
-                            >
-                              {tenderr?.deliveryNote}
-                            </div>
-                          ) : role === "supplier" ? (
-                            <TextField
-                              type="file"
-                              name="deliveryNote"
-                              onChange={handleDoc}
-                            />
-                          ) : null}
-                        </div>
-                        <div>
-                          <label htmlFor="">Receipt document</label>
-                          {tenderr?.receipt ? (
-                            <div
-                              onClick={() =>
-                                handleOpenDocument(tenderr?.receipt)
-                              }
-                              className=" cursor-pointer lowercase bg-secondary p-3 rounded text-white"
-                            >
-                              {tenderr?.receipt}
-                            </div>
-                          ) : role === "supplier" ? (
-                            <TextField
-                              type="file"
-                              name="receipt"
-                              onChange={handleDoc}
-                            />
-                          ) : null}
-                        </div>
-                      </Grid>
-                    </Grid>
-                  </ValidatorForm>
-                </div>
-              </div>
-            ) : null}
-          </SimpleCard>
-        ) : null}
-        {/* ====================================== end Deliverables ===================================== */}
+                  <Box className="breadcrumb d-flex justify-content-between align-items-center">
+                    <Typography>
+                      This section is for the supplier to upload the required
+                      documents
+                    </Typography>
+                  </Box>
 
-        {/* =================================== start Confirm delivery ====================================== */}
-        {tender?.deliveryNote && role === "company" ? (
-          <SimpleCard
-            title="Confirm Deliverables"
-            show={showContract}
-            setShow={setShowContract}
-          >
-            {showContract ? (
-              <div>
-                <Box className="breadcrumb d-flex justify-content-between align-items-center">
-                  <Typography>
-                    This section is for the institution who requested for the
-                    tools
-                  </Typography>
-                </Box>
-
-                <div>
                   <div>
-                    {tenderr?.delivered ? (
-                      <div className="fst-italic fw-bold text-success border-1 rounded">
-                        You have confirmed that the tools you requested have
-                        successfully delivered
-                      </div>
-                    ) : (
-                      <Button
-                        onClick={handleConfirmDelivery}
-                        className="p-3"
-                        color="primary"
-                        variant="contained"
-                        type="submit"
-                      >
-                        <Span sx={{ pl: 1, textTransform: "capitalize" }}>
-                          Confirm that you successfully received the tools
-                        </Span>
-                      </Button>
-                    )}
+                    <ValidatorForm
+                    // onSubmit={isUpdate ? handleUpdate : handleSubmit}
+                    // onError={() => null}
+                    >
+                      <Grid container spacing={6}>
+                        <Grid item lg={6} md={6} sm={6} xs={6} sx={{ mt: 2 }}>
+                          <div className="mb-4">
+                            <label htmlFor="">Delivery Note Document:</label>
+                            {tenderr?.deliveryNote ? (
+                              <div
+                                onClick={() =>
+                                  handleOpenDocument(tenderr?.deliveryNote)
+                                }
+                                className=" cursor-pointer lowercase bg-secondary p-3 rounded text-white"
+                              >
+                                {tenderr?.deliveryNote}
+                              </div>
+                            ) : role === "supplier" ? (
+                              <TextField
+                                type="file"
+                                name="deliveryNote"
+                                onChange={handleDoc}
+                              />
+                            ) : null}
+                          </div>
+                          <div>
+                            <label htmlFor="">Receipt document</label>
+                            {tenderr?.receipt ? (
+                              <div
+                                onClick={() =>
+                                  handleOpenDocument(tenderr?.receipt)
+                                }
+                                className=" cursor-pointer lowercase bg-secondary p-3 rounded text-white"
+                              >
+                                {tenderr?.receipt}
+                              </div>
+                            ) : role === "supplier" ? (
+                              <TextField
+                                type="file"
+                                name="receipt"
+                                onChange={handleDoc}
+                              />
+                            ) : null}
+                          </div>
+                        </Grid>
+                      </Grid>
+                    </ValidatorForm>
                   </div>
                 </div>
-              </div>
+              ) : null}
+            </SimpleCard>
+
+            {tender?.deliveryNote && role === "company" ? (
+              <SimpleCard
+                title="Confirm Deliverables"
+                show={showContract}
+                setShow={setShowContract}
+              >
+                {showContract ? (
+                  <div>
+                    <Box className="breadcrumb d-flex justify-content-between align-items-center">
+                      <Typography>
+                        This section is for the institution who requested for
+                        the tools
+                      </Typography>
+                    </Box>
+
+                    <div>
+                      <div>
+                        {tenderr?.delivered ? (
+                          <div className="fst-italic fw-bold text-success border-1 rounded">
+                            You have confirmed that the tools you requested have
+                            successfully delivered
+                          </div>
+                        ) : (
+                          <Button
+                            onClick={handleConfirmDelivery}
+                            className="p-3"
+                            color="primary"
+                            variant="contained"
+                            type="submit"
+                          >
+                            <Span sx={{ pl: 1, textTransform: "capitalize" }}>
+                              Confirm that you successfully received the tools
+                            </Span>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </SimpleCard>
             ) : null}
-          </SimpleCard>
-        ) : null}
-        {/* ====================================== end confirm delivery ===================================== */}
+          </>
+        )}
+        {/* ====================================== end deliverables and confirm deliverables ===================================== */}
       </Stack>
     </Container>
   );
