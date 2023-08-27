@@ -191,8 +191,10 @@ const BasicForm = () => {
   const handleChangeTender = (event) => {
     setStateTender({ ...stateTender, [event.target.name]: event.target.value });
   };
-  const types = ["pdf", "docs"];
-  // console.log("state ------------------- ", stateTender);
+  const handleRemoveDoc = (id) => {
+    const newDocument = documents.filter((doc) => doc.id !== id);
+    setDocuments(newDocument);
+  };
   return (
     <Container>
       <Box className="breadcrumb">
@@ -363,35 +365,35 @@ const BasicForm = () => {
               padding={"20px 24px 80px 24px"}
             >
               <Grid container spacing={2}>
-                <Grid item lg={3} md={3} sm={12} xs={12}>
+                <Grid item lg={4} md={4} sm={12} xs={12}>
                   <label htmlFor="">
-                    Name <span className="text-danger">*</span>
+                    Document name <span className="text-danger">*</span>
                   </label>
                   <TextField
                     type="text"
                     name="name"
-                    label="Name"
+                    label="Document name"
                     onChange={handleChange}
                     value={name || ""}
-                    validators={["required"]}
-                    errorMessages={["this field is required"]}
+                    // validators={["required"]}
+                    // errorMessages={["this field is required"]}
                   />
                 </Grid>
-                <Grid item lg={3} md={3} sm={12} xs={12}>
+                <Grid item lg={4} md={4} sm={12} xs={12}>
                   <label htmlFor="">
-                    Description <span className="text-danger">*</span>
+                    Document description <span className="text-danger">*</span>
                   </label>
                   <TextField
                     type="textarea"
                     name="description"
-                    label="Description"
+                    label="Document description"
                     onChange={handleChange}
                     value={description || ""}
-                    validators={["required"]}
-                    errorMessages={["this field is required"]}
+                    // validators={["required"]}
+                    // errorMessages={["this field is required"]}
                   />
                 </Grid>
-                <Grid item lg={3} md={3} sm={12} xs={12}>
+                {/* <Grid item lg={4} md={4} sm={12} xs={12}>
                   <label htmlFor="">
                     Type <span className="text-danger">*</span>
                   </label>
@@ -404,27 +406,32 @@ const BasicForm = () => {
                     validators={["required"]}
                     errorMessages={["this field is required"]}
                   />
-                </Grid>
+                </Grid> */}
                 <Grid
                   className="d-flex align-items-center justify-content-end"
                   item
-                  lg={3}
-                  md={3}
+                  lg={4}
+                  md={4}
                   sm={12}
                   xs={12}
                 >
                   <Button
                     onClick={() => {
-                      if (name !== "" || description !== "" || type !== "") {
+                      console.log(
+                        "name ============================ ",
+                        name,
+                        description
+                      );
+                      if (name !== "" && description !== "") {
                         setDocuments([
                           ...documents,
-                          { name, description, type },
+                          { id: documents.length + 1, name, description },
                         ]);
                         setState({
                           ...state,
                           name: "",
                           description: "",
-                          type: "",
+                          // type: "",
                         });
                       }
                     }}
@@ -442,7 +449,7 @@ const BasicForm = () => {
                   <TableRow>
                     <TableCell align="left">Name</TableCell>
                     <TableCell align="center">Description</TableCell>
-                    <TableCell align="center">Type</TableCell>
+                    {/* <TableCell align="center">Type</TableCell> */}
                     <TableCell align="right">Action</TableCell>
                   </TableRow>
                 </TableHead>
@@ -451,10 +458,10 @@ const BasicForm = () => {
                     <TableRow key={index}>
                       <TableCell align="left">{doc?.name}</TableCell>
                       <TableCell align="center">{doc?.description}</TableCell>
-                      <TableCell align="center">{doc?.type}</TableCell>
+                      {/* <TableCell align="center">{doc?.type}</TableCell> */}
                       <TableCell align="right">
-                        <IconButton onClick={() => {}}>
-                          <Icon title="more details" color="danger">
+                        <IconButton onClick={() => handleRemoveDoc(doc.id)}>
+                          <Icon title="remove" color="danger">
                             delete
                           </Icon>
                         </IconButton>

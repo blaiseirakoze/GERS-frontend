@@ -78,7 +78,7 @@ const Users = () => {
   // get users
   const getUsers = async () => {
     try {
-      const url = `/user/view?role=company`;
+      const url = `/user/view?role=supplier`;
       const headers = {
         "Content-Type": "application/json",
       };
@@ -117,13 +117,13 @@ const Users = () => {
   return (
     <Container>
       <ConfirmationDialog
-        title={"Delete Institution"}
-        message={"Are you sure you want to delete this institution?"}
+        title={"Delete suppler"}
+        message={"Are you sure you want to delete this supplier?"}
         action={handleDelete}
         handleClose={handleCloseDelete}
         open={openDelete} />
       <Box className="breadcrumb d-flex justify-content-between">
-        <Breadcrumb routeSegments={[{ name: "Configuration", path: "/configuration/institutions" }, { name: "Institutions" }]} />
+        <Breadcrumb routeSegments={[{ name: "Configuration", path: "/configuration/suppliers" }, { name: "suppliers" }]} />
         <StyledButton
           onClick={() => navigate("create")}
           variant="contained" color="primary">

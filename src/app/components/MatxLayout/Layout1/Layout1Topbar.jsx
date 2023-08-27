@@ -121,7 +121,7 @@ const Layout1Topbar = () => {
               <UserMenu>
                 <Hidden xsDown>
                   <Span>
-                    <strong>{role}</strong>
+                    <strong>{role === "company" ? "institution" : role}</strong>
                   </Span>
                 </Hidden>
                 <Avatar src={user.avatar} sx={{ cursor: "pointer" }} />
