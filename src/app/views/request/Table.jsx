@@ -19,6 +19,7 @@ import {
 import moment from "moment";
 import ConfirmationDialog from "app/components/dialog/ConfirmationDialog";
 import jwtDecode from "jwt-decode";
+import ExportPdf from "app/components/report/exportPdf";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -146,7 +147,7 @@ const Requests = () => {
           </StyledButton>
         ) : null}
       </Box>
-
+      {/* <ExportPdf reportData={requests} /> */}
       <SimpleCard title="Requests">
         <Box width="100%" overflow="auto">
           <StyledTable>

@@ -41,6 +41,7 @@ import { default as ReactSelect } from "react-select";
 import JoditEditor from "jodit-react";
 import { useRef } from "react";
 import { Formik, Form, Field, FieldArray } from "formik";
+import BasicModal from "app/components/dialog/ViewModal";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -132,7 +133,6 @@ const BasicForm = () => {
       });
     }
   };
-
   // create user
   const handleUpdate = async (event) => {
     try {
@@ -195,8 +195,22 @@ const BasicForm = () => {
     const newDocument = documents.filter((doc) => doc.id !== id);
     setDocuments(newDocument);
   };
+
+    // open document
+    const [openDocument, setOpenDocument] = useState(false);
+    const [fileName, setFileName] = useState("");
+    const handleOpenDocument = (fileName) => {
+      setFileName(fileName);
+      setOpenDocument(true);
+    };
+    const handleCloseDocument = () => setOpenDocument(false);
   return (
     <Container>
+      <BasicModal
+        open={openDocument}
+        handleClose={handleCloseDocument}
+        fileName={fileName && fileName}
+      />
       <Box className="breadcrumb">
         <Breadcrumb
           routeSegments={[
@@ -360,12 +374,23 @@ const BasicForm = () => {
               </Grid>
             </SimpleCard>
 
+            {request?.documents ? (
+              <SimpleCard title="Purchase Order Document">
+                <div
+                  onClick={() => handleOpenDocument(request?.documents)}
+                  className="w-50 p-3 cursor-pointer lowercase bg-secondary m-2 p-2 rounded text-white"
+                >
+                  {request?.documents}
+                </div>
+              </SimpleCard>
+            ) : null}
+
             <SimpleCard
               title={"Tender Required Documents"}
               padding={"20px 24px 80px 24px"}
             >
               <Grid container spacing={2}>
-                <Grid item lg={4} md={4} sm={12} xs={12}>
+                <Grid item lg={3} md={3} sm={12} xs={12}>
                   <label htmlFor="">
                     Document name <span className="text-danger">*</span>
                   </label>
@@ -379,7 +404,7 @@ const BasicForm = () => {
                     // errorMessages={["this field is required"]}
                   />
                 </Grid>
-                <Grid item lg={4} md={4} sm={12} xs={12}>
+                <Grid item lg={3} md={3} sm={12} xs={12}>
                   <label htmlFor="">
                     Document description <span className="text-danger">*</span>
                   </label>
@@ -393,9 +418,9 @@ const BasicForm = () => {
                     // errorMessages={["this field is required"]}
                   />
                 </Grid>
-                {/* <Grid item lg={4} md={4} sm={12} xs={12}>
+                <Grid item lg={3} md={3} sm={12} xs={12}>
                   <label htmlFor="">
-                    Type <span className="text-danger">*</span>
+                    Document Type <span className="text-danger">*</span>
                   </label>
                   <TextField
                     type="text"
@@ -403,26 +428,21 @@ const BasicForm = () => {
                     label="Type"
                     onChange={handleChange}
                     value={type || ""}
-                    validators={["required"]}
-                    errorMessages={["this field is required"]}
+                    // validators={["required"]}
+                    // errorMessages={["this field is required"]}
                   />
-                </Grid> */}
+                </Grid>
                 <Grid
                   className="d-flex align-items-center justify-content-end"
                   item
-                  lg={4}
-                  md={4}
+                  lg={3}
+                  md={3}
                   sm={12}
                   xs={12}
                 >
                   <Button
                     onClick={() => {
-                      console.log(
-                        "name ============================ ",
-                        name,
-                        description
-                      );
-                      if (name !== "" && description !== "") {
+                      if (name !== "" && description !== "" && type !== "") {
                         setDocuments([
                           ...documents,
                           { id: documents.length + 1, name, description },
@@ -431,7 +451,7 @@ const BasicForm = () => {
                           ...state,
                           name: "",
                           description: "",
-                          // type: "",
+                          type: "",
                         });
                       }
                     }}

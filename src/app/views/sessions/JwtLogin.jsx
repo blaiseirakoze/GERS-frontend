@@ -86,9 +86,9 @@ const JwtLogin = () => {
       const accessToken = data?.accessToken;
       if (data) {
         localStorage.setItem("accessToken", accessToken);
-        window.location.replace("/dashboard/default");
+        window.location.replace("/dashboard");
       }
-      window.location.replace("/dashboard/default");
+      window.location.replace("/dashboard");
     } catch (error) {
       setAlert({
         ...alert,

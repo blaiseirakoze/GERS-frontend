@@ -19,6 +19,8 @@ import SupplierForm from "./views/configuration/supplier/From";
 import RisaUsers from "./views/configuration/risa/Table";
 import RisaForm from "./views/configuration/risa/From";
 
+import RoleForm from "./views/configuration/role/From";
+
 import Requests from "./views/request/Table";
 import CreateRequest from "./views/request/From";
 import RequestDetails from "./views/request/Details";
@@ -52,14 +54,15 @@ const routes = [
     children: [
       ...materialRoutes,
       // dashboard route
-      { path: "/dashboard/default", element: <Analytics /> },
+      { path: "/dashboard", element: <Analytics /> },
 
       // configuration route
       { path: "/configuration", element: <Users /> },
 
-      { path: "/configuration/users", element: <Users /> },
-      { path: "/configuration/users/create", element: <Form /> },
-      { path: "/configuration/users/update/:id", element: <Form /> },
+      // { path: "/configuration/users", element: <Users /> },
+      // { path: "/configuration/users/create", element: <Form /> },
+
+      { path: "/configuration/roles/update/:id", element: <RoleForm /> },
 
       { path: "/configuration/institutions", element: <Institutions /> },
       {
@@ -105,7 +108,7 @@ const routes = [
   { path: "/session/signup", element: <JwtRegister /> },
   { path: "/session/forgot-password", element: <ForgotPassword /> },
 
-  { path: "/", element: <Navigate to="dashboard/default" /> },
+  { path: "/", element: <Navigate to="dashboard" /> },
   { path: "*", element: <NotFound /> },
 ];
 

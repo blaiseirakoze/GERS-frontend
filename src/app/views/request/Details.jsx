@@ -25,6 +25,7 @@ import { useRef } from "react";
 import { Fab } from "@mui/material";
 import ChangeStatus from "./ChangeStatus";
 import jwtDecode from "jwt-decode";
+import BasicModal from "app/components/dialog/ViewModal";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -139,12 +140,26 @@ const Details = () => {
     getRequests();
   }, []);
 
+  // open document
+  const [openDocument, setOpenDocument] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const handleOpenDocument = (fileName) => {
+    setFileName(fileName);
+    setOpenDocument(true);
+  };
+  const handleCloseDocument = () => setOpenDocument(false);
+
   const accessToken = localStorage.getItem("accessToken");
   const decodedToken = accessToken && jwtDecode(accessToken);
   const role = decodedToken?.userRole;
 
   return (
     <Container>
+      <BasicModal
+        open={openDocument}
+        handleClose={handleCloseDocument}
+        fileName={fileName && fileName}
+      />
       <ChangeStatus
         open={open}
         handleClose={handleCloseChangeStatus}
@@ -252,15 +267,22 @@ const Details = () => {
             onChange={(newContent) => {}}
           />
         </SimpleCard>
-        {/* <SimpleCard title="Supporting Document">
-          <div className="bg-secondary py-2 px-4 rounded text-white fw-bold d-flex" style={{ width: "20%" }}>
-            <span>{request?.documents}</span> <IconButton className="text-white"> <Icon>visibility</Icon> </IconButton>
-          </div>
-        </SimpleCard> */}
+
+        {request?.documents ? (
+          <SimpleCard title="Purchase Order Document">
+            <div
+              onClick={() => handleOpenDocument(request?.documents)}
+              className="w-50 p-3 cursor-pointer lowercase bg-secondary m-2 p-2 rounded text-white"
+            >
+              {request?.documents}
+            </div>
+          </SimpleCard>
+        ) : null}
+
         <SimpleCard title="Request Process">
           {request?.requestProcess?.map((process, index) => {
             return (
-              <div key={index} className="">
+              <div key={index} className="mb-4">
                 <div className="p-0">
                   {" "}
                   <IconButton
@@ -280,6 +302,11 @@ const Details = () => {
                   {process?.createdBy?.firstName} {process?.createdBy?.lastName}{" "}
                   - {moment(process?.createdAt).format("DD-MM-yyyy HH:mm")}
                 </div>
+                {process?.comment ? (
+                  <div style={{ marginLeft: "2.8rem" }}>
+                    comment: {process.comment}
+                  </div>
+                ) : null}
               </div>
             );
           })}

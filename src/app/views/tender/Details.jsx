@@ -300,7 +300,7 @@ const Details = () => {
       });
     }
   };
-  console.log("tender ------------- ", tenderr);
+  const request = tenderr?.request;
   return (
     <Container>
       <BasicModal
@@ -368,6 +368,19 @@ const Details = () => {
           ) : null}
         </SimpleCard>
 
+        {/* ================================================ start request details =========================================================== */}
+        {request?.documents ? (
+          <SimpleCard title="Purchase Order Document">
+            <div
+              onClick={() => handleOpenDocument(request?.documents)}
+              className="w-50 p-3 cursor-pointer lowercase bg-secondary m-2 p-2 rounded text-white"
+            >
+              {request?.documents}
+            </div>
+          </SimpleCard>
+        ) : null}
+        {/* ================================================ end request details ========================================================= */}
+        
         {/* =============================================== bid information============================================================================= */}
         <SimpleCard title="Bid Information" show={showBid} setShow={setShowBid}>
           {showBid ? (
@@ -549,7 +562,7 @@ const Details = () => {
         </SimpleCard>
 
         {/* =================================== start Deliverables && confirm Deliverables ====================================== */}
-        {role === "supplier" && tenderr?.supplier.id !== userId ? null : (
+        {role === "supplier" && tenderr?.supplier?.id !== userId ? null : (
           <>
             <SimpleCard
               title="Deliverables"
