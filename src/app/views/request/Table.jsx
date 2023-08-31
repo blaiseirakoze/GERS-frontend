@@ -15,11 +15,13 @@ import {
   TablePagination,
   TableRow,
   useTheme,
+  Tooltip,
 } from "@mui/material";
 import moment from "moment";
 import ConfirmationDialog from "app/components/dialog/ConfirmationDialog";
 import jwtDecode from "jwt-decode";
 import ExportPdf from "app/components/report/exportPdf";
+import DatatableComponent from "app/components/Datatable";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -120,7 +122,110 @@ const Requests = () => {
   const accessToken = localStorage.getItem("accessToken");
   const decodedToken = accessToken && jwtDecode(accessToken);
   const role = decodedToken?.userRole;
+  // const [requests, setRequests] = useState([]);
 
+  // ======================================  columns ==========================
+  const columns = [
+    {
+      name: "requestedBy",
+      label: "Requested by",
+      options: {
+        sort: true,
+        customBodyRender: (value) => (
+          <span>
+            {" "}
+            {value?.firstName} {value?.lastName}
+          </span>
+        ),
+      },
+    },
+    {
+      name: "createdAt",
+      label: "Created date",
+      options: {
+        sort: true,
+        customBodyRender: (date) => moment(date).format("YYYY-MMM-DD "),
+      },
+    },
+    {
+      name: "status",
+      label: "Status",
+      options: {
+        sort: true,
+        customBodyRender: (value) => (
+          <Small
+            bgcolor={
+              value === "pending"
+                ? bgWarning
+                : value === "missing information"
+                ? bgInfo
+                : value === "approved"
+                ? bgSuccess
+                : bgError
+            }
+          >
+            {value}
+          </Small>
+        ),
+      },
+    },
+    {
+      name: "id",
+      label: "Action",
+      options: {
+        sort: true,
+        customBodyRenderLite: (dataIndex, rowIndex) => (
+          <>
+            <IconButton
+              onClick={() => {
+                navigate(`details/${requests[rowIndex]?.id}`, {
+                  state: requests[rowIndex],
+                });
+              }}
+            >
+              <Icon title="more details" color="info">
+                info
+              </Icon>
+            </IconButton>
+            {requests[rowIndex]?.status === "pending" ||
+            requests[rowIndex]?.status === "missing information" ? (
+              <IconButton
+                onClick={() =>
+                  navigate(`update/${requests[rowIndex].id}`, { state: requests[rowIndex] })
+                }
+                title="update"
+              >
+                <Icon color="info">edit</Icon>
+              </IconButton>
+            ) : null}
+            {requests[rowIndex]?.status === "pending" ? (
+              <IconButton
+                onClick={() => {
+                  handleOpenDelete(requests[rowIndex]?.id);
+                }}
+              >
+                <Icon title="delete" color="error">
+                  close
+                </Icon>
+              </IconButton>
+            ) : null}
+            {requests[rowIndex]?.status === "approved" &&
+            requests[rowIndex]?.tenderPublished === false ? (
+              <IconButton
+                onClick={() => {
+                  navigate("/tenders/create", { state: requests });
+                }}
+              >
+                <Icon title="create tender" color="info">
+                  work
+                </Icon>
+              </IconButton>
+            ) : null}
+          </>
+        ),
+      },
+    },
+  ];
   return (
     <Container>
       <ConfirmationDialog
@@ -147,9 +252,17 @@ const Requests = () => {
           </StyledButton>
         ) : null}
       </Box>
-      {/* <ExportPdf reportData={requests} /> */}
-      <SimpleCard title="Requests">
-        <Box width="100%" overflow="auto">
+      {/* <SimpleCard title="Requests"> */}
+      <DatatableComponent
+        title={"Requests"}
+        processData={(data) => {
+          setRequests(data?.data?.data);
+          return data?.data;
+        }}
+        columns={columns}
+        url={`/request/datatable`}
+      />
+      {/* <Box width="100%" overflow="auto">
           <StyledTable>
             <TableHead>
               <TableRow>
@@ -253,8 +366,8 @@ const Requests = () => {
             nextIconButtonProps={{ "aria-label": "Next Page" }}
             backIconButtonProps={{ "aria-label": "Previous Page" }}
           />
-        </Box>
-      </SimpleCard>
+        </Box> */}
+      {/* </SimpleCard> */}
     </Container>
   );
 };
