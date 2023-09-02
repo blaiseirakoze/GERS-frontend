@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import moment from "moment";
 import ConfirmationDialog from "app/components/dialog/ConfirmationDialog";
+import DatatableComponent from "app/components/Datatable";
 
 const Container = styled("div")(({ theme }) => ({
   margin: "30px",
@@ -42,15 +43,15 @@ const StyledTable = styled(Table)(() => ({
   },
 }));
 
-const Small = styled('small')(({ bgcolor }) => ({
+const Small = styled("small")(({ bgcolor }) => ({
   width: 50,
   height: 15,
-  color: '#fff',
-  padding: '2px 8px',
-  borderRadius: '4px',
-  overflow: 'hidden',
+  color: "#fff",
+  padding: "2px 8px",
+  borderRadius: "4px",
+  overflow: "hidden",
   background: bgcolor,
-  boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 2px 2px 0 rgba(0, 0, 0, 0.24)',
+  boxShadow: "0 0 2px 0 rgba(0, 0, 0, 0.12), 0 2px 2px 0 rgba(0, 0, 0, 0.24)",
 }));
 
 const Requests = () => {
@@ -65,7 +66,7 @@ const Requests = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openDelete, setOpenDelete] = useState(false);
   const [id, setId] = useState("");
-  
+
   const handleChangePage = (_, newPage) => {
     setPage(newPage);
   };
@@ -88,34 +89,69 @@ const Requests = () => {
       const method = "get";
       const { data } = await axios({ method, headers, url });
       setTenders(data?.data);
-    } catch (error) {
-    }
-  }
-
-  // // handle delete
-  // const handleDelete = async () => {
-  //   try {
-  //     const url = `/request/delete/${id}`;
-  //     const headers = {
-  //       "Content-Type": "application/json",
-  //     };
-  //     const method = "delete";
-  //     await axios({ method, headers, url });
-  //     getRequests();
-  //     setOpenDelete(false);
-  //   } catch (error) {
-  //   }
-  // }
-
-  // const handleCloseDelete = () => setOpenDelete(false);
-  // const handleOpenDelete = (id) => {
-  //   setId(id);
-  //   setOpenDelete(true)
-  // };
+    } catch (error) {}
+  };
 
   useEffect(() => {
     getTenders();
   }, []);
+
+  // ======================================  columns ==========================
+  const columns = [
+    {
+      name: "name",
+      label: "Name",
+      options: {
+        sort: true,
+      },
+    },
+    {
+      name: "Open Date",
+      label: "openDate",
+      options: {
+        sort: true,
+        customBodyRender: (date) => moment(date?.openDate).format("DD-MM-yyyy"),
+      },
+    },
+    {
+      name: "Close Date",
+      label: "closeDate",
+      options: {
+        sort: true,
+        customBodyRender: (date) =>
+          moment(date?.closeDate).format("DD-MM-yyyy"),
+      },
+    },
+    {
+      name: "status",
+      label: "Status",
+      options: {
+        sort: true,
+      },
+    },
+    {
+      name: "id",
+      label: "Action",
+      options: {
+        sort: true,
+        customBodyRenderLite: (dataIndex, rowIndex) => (
+          <>
+            <IconButton
+              onClick={() => {
+                navigate(`details/${tenders[rowIndex]?.id}`, {
+                  state: tenders[rowIndex],
+                });
+              }}
+            >
+              <Icon title="more details" color="info">
+                info
+              </Icon>
+            </IconButton>
+          </>
+        ),
+      },
+    },
+  ];
 
   return (
     <Container>
@@ -126,7 +162,12 @@ const Requests = () => {
         handleClose={handleCloseDelete}
         open={openDelete} /> */}
       <Box className="breadcrumb d-flex justify-content-between">
-        <Breadcrumb routeSegments={[{ name: "Tender", path: "/tenders" }, { name: "Tenders" }]} />
+        <Breadcrumb
+          routeSegments={[
+            { name: "Tender", path: "/tenders" },
+            { name: "Tenders" },
+          ]}
+        />
         {/* <StyledButton
           onClick={() => navigate("create")}
           variant="contained" color="primary">
@@ -134,13 +175,22 @@ const Requests = () => {
         </StyledButton> */}
       </Box>
 
-      <SimpleCard title="Tenders">
+      <DatatableComponent
+        title={"Tenders"}
+        processData={(data) => {
+          setTenders(data?.data?.data);
+          return data?.data;
+        }}
+        columns={columns}
+        url={`/tender/datatable`}
+      />
+
+      {/* <SimpleCard title="Tenders">
         <Box width="100%" overflow="auto">
           <StyledTable>
             <TableHead>
               <TableRow>
                 <TableCell align="left">Name</TableCell>
-                {/* <TableCell align="center">Published Date</TableCell> */}
                 <TableCell align="center">Open Date</TableCell>
                 <TableCell align="center">Close Date</TableCell>
                 <TableCell align="center">Status</TableCell>
@@ -153,7 +203,6 @@ const Requests = () => {
                 map((tender, index) => (
                   <TableRow key={index}>
                     <TableCell align="left">{tender?.name}</TableCell>
-                    {/* <TableCell align="center">{moment(tender?.publishDate).format("DD-MM-yyyy")}</TableCell> */}
                     <TableCell align="center">{moment(tender?.openDate).format("DD-MM-yyyy")}</TableCell>
                     <TableCell align="center">{moment(tender?.closeDate).format("DD-MM-yyyy")}</TableCell>
                     <TableCell align="center">{tender.status}</TableCell>
@@ -166,7 +215,6 @@ const Requests = () => {
                 ))}
             </TableBody>
           </StyledTable>
-
           <TablePagination
             sx={{ px: 2 }}
             page={page}
@@ -180,7 +228,7 @@ const Requests = () => {
             backIconButtonProps={{ "aria-label": "Previous Page" }}
           />
         </Box>
-      </SimpleCard>
+      </SimpleCard> */}
     </Container>
   );
 };
