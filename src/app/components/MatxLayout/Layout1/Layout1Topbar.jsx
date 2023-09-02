@@ -107,6 +107,7 @@ const Layout1Topbar = () => {
   const accessToken = localStorage.getItem("accessToken");
   const decodedToken = accessToken && jwtDecode(accessToken);
   const role = decodedToken?.userRole;
+  const roleLabel = decodedToken?.userRoleLabel;
   return (
     <TopbarRoot>
       <TopbarContainer>
@@ -120,8 +121,8 @@ const Layout1Topbar = () => {
             menuButton={
               <UserMenu>
                 <Hidden xsDown>
-                  <Span>
-                    <strong>{role === "company" ? "institution" : role}</strong>
+                  <Span className="text-capitalize">
+                    <strong>{roleLabel}</strong>
                   </Span>
                 </Hidden>
                 <Avatar src={user.avatar} sx={{ cursor: "pointer" }} />

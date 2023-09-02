@@ -130,7 +130,6 @@ const Users = () => {
           Add new
         </StyledButton>
       </Box>
-
       <SimpleCard title="Risa users">
         <Box width="100%" overflow="auto">
           <StyledTable>
