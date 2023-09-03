@@ -134,8 +134,8 @@ const Requests = () => {
       label: "Action",
       options: {
         sort: true,
-        customBodyRenderLite: (dataIndex, rowIndex) => (
-          <>
+        customBodyRenderLite: (dataIndex, rowIndex) => {
+          return (
             <IconButton
               onClick={() => {
                 navigate(`details/${tenders[rowIndex]?.id}`, {
@@ -147,8 +147,8 @@ const Requests = () => {
                 info
               </Icon>
             </IconButton>
-          </>
-        ),
+          );
+        },
       },
     },
   ];

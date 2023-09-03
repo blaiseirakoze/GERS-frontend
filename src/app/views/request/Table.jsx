@@ -213,7 +213,7 @@ const Requests = () => {
             requests[rowIndex]?.tenderPublished === false ? (
               <IconButton
                 onClick={() => {
-                  navigate("/tenders/create", { state: requests });
+                  navigate("/tenders/create", { state: requests[rowIndex] });
                 }}
               >
                 <Icon title="create tender" color="info">
