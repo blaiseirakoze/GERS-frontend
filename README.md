@@ -15,22 +15,41 @@
     Bootstrap
 ```
 
-<h2 id="availablescripts">Getting started</h2>
+## Getting started
 
-<p>In the project directory, you can run:</p>
+-   Clone the project
 
-<h3 id="npmstart"><code>npm start</code></h3>
+```
+    > git clone <url>
+```
 
-<p>Runs the app in the development mode.<br>
-Open <a href="http://localhost:3000">http://localhost:3000</a> to view it in the browser.</p>
+-   Navigate to the project repository
 
-<p>The page will reload if you make edits.<br>
-You will also see any lint errors in the console.</p>
+```
+    > cd GERS-backend
+```
 
-<h3 id="npmrunbuild"><code>npm run build</code></h3>
+-   Generate .env
 
-<p>Builds the app for production to the <code>build</code> folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.</p>
+```
+    > copy .env.example .env
+```
 
-<p>The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!</p>
+-   Install
+
+```
+    > yarn install or npm install
+```
+
+-   Run
+
+```
+    > yarn start or npm start
+```
+## Documentation :pencil:
+
+```
+    none
+```
+
+&copy; Blaise Irakoze
