@@ -26,7 +26,7 @@
 -   Navigate to the project repository
 
 ```
-    > cd GERS-backend
+    > cd GERS-frontend
 ```
 
 -   Generate .env
